@@ -24,44 +24,17 @@ _LOGIN_HTML_TEMPLATE = """\
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign in — CommonAgent</title>
+<link rel="icon" href="/favicon.ico">
 <style>
-  /* Brand fonts shipped by @nous-research/ui — same files the SPA loads. */
-  @font-face {{
-    font-family: 'Collapse';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/Collapse-Regular.woff2') format('woff2');
-  }}
-  @font-face {{
-    font-family: 'Collapse';
-    font-style: normal;
-    font-weight: 700;
-    font-display: swap;
-    src: url('/fonts/Collapse-Bold.woff2') format('woff2');
-  }}
-  @font-face {{
-    font-family: 'Rules Compressed';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/RulesCompressed-Regular.woff2') format('woff2');
-  }}
-  @font-face {{
-    font-family: 'Rules Compressed';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url('/fonts/RulesCompressed-Medium.woff2') format('woff2');
-  }}
-
   :root {{
-    --background-base: #170d02;
-    --background: #170d02;
-    --midground: #ffac02;
-    --foreground: #ffffff;
-    --hairline: color-mix(in srgb, #ffac02 18%, transparent);
-    --hairline-strong: color-mix(in srgb, #ffac02 35%, transparent);
+    --background-base: #ffffff;
+    --text-primary: #0d0d0d;
+    --text-secondary: #5d5d5d;
+    --hairline: #e5e5e5;
+    --hairline-strong: #d4d4d4;
+    --primary: #0d0d0d;
+    --primary-foreground: #ffffff;
+    --surface-muted: #f9f9f9;
   }}
 
   *, *::before, *::after {{ box-sizing: border-box; }}
@@ -71,28 +44,12 @@ _LOGIN_HTML_TEMPLATE = """\
     padding: 0;
     min-height: 100%;
     background: var(--background-base);
-    color: var(--foreground);
-    font-family: 'Collapse', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }}
-
-  /* Subtle dot-grid backdrop — DS idiom (see `.dither` in globals.css). */
-  body {{
-    background-image:
-      radial-gradient(
-        ellipse at top,
-        color-mix(in srgb, var(--midground) 6%, transparent) 0%,
-        transparent 55%
-      ),
-      repeating-conic-gradient(
-        color-mix(in srgb, var(--midground) 4%, transparent) 0% 25%,
-        transparent 0% 50%
-      );
-    background-size: auto, 3px 3px;
-    background-attachment: fixed;
   }}
 
   /* Layout: vertically center on tall screens, top-anchor on short. */
@@ -106,7 +63,7 @@ _LOGIN_HTML_TEMPLATE = """\
     width: 100%;
     max-width: 26rem;
     position: relative;
-    animation: slide-up 0.6s ease-out both;
+    animation: slide-up 0.4s ease-out both;
   }}
 
   @keyframes slide-up {{
@@ -118,54 +75,54 @@ _LOGIN_HTML_TEMPLATE = """\
     main {{ animation: none; }}
   }}
 
-  /* Brand wordmark above the card — same uppercase + wide-tracking
-     idiom DS Buttons use. */
+  /* Brand lockup above the card — logo image + wordmark + tagline, mirroring
+     the SPA sidebar. */
   .brand {{
     text-align: center;
     margin-bottom: 1.75rem;
-    font-family: 'Rules Compressed', 'Collapse', sans-serif;
-    font-weight: 600;
-    font-size: 1.05rem;
-    letter-spacing: 0.32em;
-    text-transform: uppercase;
-    color: var(--midground);
   }}
-  .brand .dot {{
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--midground);
-    margin: 0 0.55em 0.18em;
-    vertical-align: middle;
-    border-radius: 1px;
+  .brand img {{
+    height: 2.75rem;
+    width: auto;
+    margin-bottom: 0.6rem;
+  }}
+  .brand .name {{
+    display: block;
+    font-weight: 600;
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }}
+  .brand .tagline {{
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.625rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }}
 
   .card {{
     position: relative;
-    padding: 2.25rem 2rem 2rem;
-    background: color-mix(in srgb, #ffffff 2%, var(--background-base));
+    padding: 2rem 2rem 1.75rem;
+    background: var(--background-base);
     border: 1px solid var(--hairline);
-    /* Hairline highlight + bevel shadow — matches DS Button SHADOW_DEFAULT
-       (`inset -1px -1px 0 #00000080, inset 1px 1px 0 #ffffff80`) at panel scale. */
-    box-shadow:
-      inset 1px 1px 0 0 color-mix(in srgb, #ffffff 5%, transparent),
-      inset -1px -1px 0 0 rgba(0, 0, 0, 0.4),
-      0 24px 60px -20px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   }}
 
   h1 {{
     margin: 0 0 0.4rem;
-    font-family: 'Rules Compressed', 'Collapse', sans-serif;
     font-weight: 600;
-    font-size: 1.85rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--foreground);
+    font-size: 1.4rem;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
   }}
 
   .subtitle {{
     margin: 0 0 1.75rem;
-    color: color-mix(in srgb, var(--foreground) 65%, transparent);
+    color: var(--text-secondary);
     font-size: 0.95rem;
   }}
 
@@ -174,87 +131,74 @@ _LOGIN_HTML_TEMPLATE = """\
     gap: 0.75rem;
   }}
 
-  /* Provider button — mirrors DS Button (default variant):
-     amber surface, dark text, uppercase + wide tracking, inset bevel. */
+  /* Provider button — black pill, ChatGPT-style. */
   .provider-btn {{
     display: block;
     width: 100%;
     box-sizing: border-box;
-    padding: 0.95rem 1rem;
+    padding: 0.8rem 1rem;
     text-align: center;
-    background: var(--midground);
-    color: var(--background-base);
-    font-family: 'Collapse', sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-family: inherit;
+    font-weight: 500;
+    font-size: 0.95rem;
     text-decoration: none;
     border: 0;
-    border-radius: 0;  /* DS Button is squared — no rounded corners. */
+    border-radius: 9999px;
     cursor: pointer;
-    box-shadow:
-      inset 1px 1px 0 0 rgba(255, 255, 255, 0.5),
-      inset -1px -1px 0 0 rgba(0, 0, 0, 0.5);
-    transition: filter 0.12s ease-out;
+    transition: opacity 0.12s ease-out;
   }}
   .provider-btn:hover {{
-    filter: brightness(1.08);
+    opacity: 0.85;
   }}
   .provider-btn:active {{
-    /* DS Button uses `active:invert` on the default surface. */
-    filter: invert(1);
+    opacity: 0.75;
   }}
   .provider-btn:focus-visible {{
-    outline: 2px solid var(--midground);
+    outline: 2px solid var(--text-primary);
     outline-offset: 3px;
   }}
 
-  /* Password provider form — same visual language as the OAuth buttons:
-     squared inputs, hairline borders, amber focus ring. */
+  /* Password provider form — rounded inputs, hairline borders. */
   .provider-form {{
     display: grid;
-    gap: 0.75rem;
+    gap: 0.85rem;
     text-align: left;
   }}
   .form-title {{
-    font-family: 'Rules Compressed', 'Collapse', sans-serif;
-    font-weight: 600;
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--foreground) 70%, transparent);
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-primary);
   }}
   .field {{
     display: grid;
     gap: 0.3rem;
   }}
   .field-label {{
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--foreground) 55%, transparent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
   }}
   .field-input {{
     width: 100%;
     box-sizing: border-box;
-    padding: 0.7rem 0.8rem;
-    background: color-mix(in srgb, #000000 25%, var(--background-base));
-    color: var(--foreground);
+    padding: 0.65rem 0.8rem;
+    background: var(--background-base);
+    color: var(--text-primary);
     border: 1px solid var(--hairline-strong);
-    border-radius: 0;
-    font-family: 'Collapse', sans-serif;
+    border-radius: 8px;
+    font-family: inherit;
     font-size: 0.95rem;
   }}
   .field-input:focus-visible {{
     outline: none;
-    border-color: var(--midground);
-    box-shadow: 0 0 0 1px var(--midground);
+    border-color: var(--text-primary);
+    box-shadow: 0 0 0 1px var(--text-primary);
   }}
   .form-error {{
-    color: #ff6b6b;
-    font-size: 0.82rem;
-    letter-spacing: 0.02em;
+    color: #d92d20;
+    font-size: 0.85rem;
   }}
   .provider-form .provider-btn {{
     margin-top: 0.25rem;
@@ -263,10 +207,8 @@ _LOGIN_HTML_TEMPLATE = """\
   footer {{
     margin-top: 1.75rem;
     text-align: center;
-    color: color-mix(in srgb, var(--foreground) 45%, transparent);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
     line-height: 1.7;
   }}
   footer .sep {{
@@ -278,16 +220,19 @@ _LOGIN_HTML_TEMPLATE = """\
     margin: 0 0.6em 0.2em;
   }}
 
-  /* Selection — DS uses midground bg + background text. */
   ::selection {{
-    background: var(--midground);
+    background: var(--text-primary);
     color: var(--background-base);
   }}
 </style>
 </head>
 <body>
 <main>
-  <div class="brand">Common<span class="dot"></span>Agent</div>
+  <div class="brand">
+    <img src="/logo.png" alt="CommonAgent">
+    <span class="name">CommonAgent</span>
+    <span class="tagline">Smarter Together</span>
+  </div>
   <div class="card">
     <h1>Sign in</h1>
     <p class="subtitle">Choose a sign-in method to continue to the CommonAgent dashboard.</p>
@@ -311,33 +256,20 @@ _EMPTY_HTML = """\
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign-in unavailable — CommonAgent</title>
+<link rel="icon" href="/favicon.ico">
 <style>
-  @font-face {
-    font-family: 'Collapse';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/Collapse-Regular.woff2') format('woff2');
-  }
-  @font-face {
-    font-family: 'Rules Compressed';
-    font-style: normal;
-    font-weight: 600;
-    font-display: swap;
-    src: url('/fonts/RulesCompressed-Medium.woff2') format('woff2');
-  }
   :root {
-    --background-base: #170d02;
-    --midground: #ffac02;
-    --foreground: #ffffff;
-    --hairline: color-mix(in srgb, #ffac02 18%, transparent);
+    --background-base: #ffffff;
+    --text-primary: #0d0d0d;
+    --text-secondary: #5d5d5d;
+    --hairline: #e5e5e5;
   }
   *, *::before, *::after { box-sizing: border-box; }
   html, body {
     margin: 0; padding: 0; min-height: 100%;
     background: var(--background-base);
-    color: var(--foreground);
-    font-family: 'Collapse', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     font-size: 16px; line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
@@ -347,30 +279,28 @@ _EMPTY_HTML = """\
   }
   main {
     width: 100%; max-width: 32rem;
-    padding: 2.25rem 2rem;
-    background: color-mix(in srgb, #ffffff 2%, var(--background-base));
+    padding: 2rem;
+    background: var(--background-base);
     border: 1px solid var(--hairline);
-    box-shadow:
-      inset 1px 1px 0 0 color-mix(in srgb, #ffffff 5%, transparent),
-      inset -1px -1px 0 0 rgba(0, 0, 0, 0.4),
-      0 24px 60px -20px rgba(0, 0, 0, 0.6);
+    border-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   }
   h1 {
     margin: 0 0 1rem;
-    font-family: 'Rules Compressed', 'Collapse', sans-serif;
-    font-weight: 600; font-size: 1.5rem;
-    letter-spacing: 0.05em; text-transform: uppercase;
-    color: var(--midground);
+    font-weight: 600; font-size: 1.4rem;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
   }
-  p { margin: 0 0 1rem; }
+  p { margin: 0 0 1rem; color: var(--text-secondary); }
   code {
-    background: var(--midground);
-    color: var(--background-base);
+    background: #f1f1f1;
+    color: var(--text-primary);
     padding: 0.1em 0.35em;
-    font-family: 'Courier New', monospace;
+    border-radius: 4px;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
     font-size: 0.9em;
   }
-  a { color: var(--midground); }
+  a { color: var(--text-primary); }
 </style>
 </head>
 <body>

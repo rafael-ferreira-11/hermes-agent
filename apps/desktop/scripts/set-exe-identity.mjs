@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// set-exe-identity.mjs — stamp the Hermes icon + version metadata onto the
-// built Hermes.exe using rcedit, completely decoupled from electron-builder's
+// set-exe-identity.mjs — stamp the CommonAgent icon + version metadata onto the
+// built CommonAgent.exe using rcedit, completely decoupled from electron-builder's
 // signing path.
 //
 // WHY THIS EXISTS
@@ -86,10 +86,10 @@ async function stampExeIdentity(
   const options = {
     icon,
     'version-string': {
-      ProductName: 'Hermes',
-      FileDescription: 'Hermes',
-      CompanyName: 'Nous Research',
-      LegalCopyright: 'Copyright (c) 2026 Nous Research'
+      ProductName: 'CommonAgent',
+      FileDescription: 'CommonAgent',
+      CompanyName: 'Rafael Ferreira',
+      LegalCopyright: 'Copyright (c) 2026 Rafael Ferreira'
     }
   }
 
