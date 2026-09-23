@@ -614,11 +614,15 @@ export default function App() {
               >
                 <PluginSlot name="header-left" />
 
-                <Typography className="font-bold text-[1.125rem] leading-[0.95] tracking-[0.0525rem] text-midground uppercase">
-                  Hermes
-                  <br />
-                  Agent
-                </Typography>
+                <img src="/logo.png" alt="" className="h-7 w-auto select-none" draggable={false} />
+                <div className="flex flex-col">
+                  <Typography className="font-semibold text-[1.125rem] leading-[1.1] tracking-tight text-midground">
+                    CommonAgent
+                  </Typography>
+                  <span className="text-[0.625rem] uppercase tracking-[0.18em] text-text-secondary">
+                    Smarter Together
+                  </span>
+                </div>
               </div>
 
               <Button

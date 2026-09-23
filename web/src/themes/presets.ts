@@ -65,20 +65,65 @@ export function webPresetFromShared(
 // Themes
 // ---------------------------------------------------------------------------
 
+/** Inter via Google Fonts — the CommonAgent look approximates ChatGPT's
+   Söhne with Inter, which the browser already knows from midnight. */
+const COMMON_TYPOGRAPHY: ThemeTypography = {
+  fontSans: `"Inter", ${SYSTEM_SANS}`,
+  fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
+  baseSize: "16px",
+  lineHeight: "1.5",
+  letterSpacing: "0",
+  fontUrl:
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap",
+};
+
+const COMMON_LAYOUT: ThemeLayout = {
+  radius: "0.5rem",
+  density: "comfortable",
+};
+
 export const defaultTheme: DashboardTheme = {
   name: "default",
-  label: "Hermes Teal",
-  description: "Classic dark teal — the canonical Hermes look",
+  label: "CommonAgent Dark",
+  description: "Soft charcoal with light text — the CommonAgent look",
   palette: {
-    background: { hex: "#041c1c", alpha: 1 },
-    midground: { hex: "#ffe6cb", alpha: 1 },
+    background: { hex: "#212121", alpha: 1 },
+    midground: { hex: "#ececec", alpha: 1 },
     foreground: { hex: "#ffffff", alpha: 0 },
-    warmGlow: "rgba(255, 189, 56, 0.35)",
-    noiseOpacity: 1,
+    warmGlow: "rgba(236, 236, 236, 0.2)",
+    noiseOpacity: 0,
   },
-  typography: DEFAULT_TYPOGRAPHY,
-  layout: DEFAULT_LAYOUT,
-  terminalBackground: "#000000",
+  typography: COMMON_TYPOGRAPHY,
+  layout: COMMON_LAYOUT,
+  terminalBackground: "#0d0d0d",
+  seriesColors: {
+    inputTokenAccent: "#10a37f",
+    outputTokenAccent: "#ececec",
+  },
+  swatchColors: ["#ececec", "#212121", "#10a37f"],
+};
+
+/** ChatGPT-style light mode — white canvas, near-black text and buttons. */
+export const commonLightTheme: DashboardTheme = {
+  name: "common-light",
+  label: "CommonAgent Light",
+  description: "Light mode — white canvas, near-black text",
+  palette: {
+    background: { hex: "#ffffff", alpha: 1 },
+    midground: { hex: "#0d0d0d", alpha: 1 },
+    foreground: { hex: "#ffffff", alpha: 0 },
+    warmGlow: "rgba(0, 0, 0, 0.05)",
+    noiseOpacity: 0,
+  },
+  typography: COMMON_TYPOGRAPHY,
+  layout: COMMON_LAYOUT,
+  terminalBackground: "#ffffff",
+  terminalForeground: "#0d0d0d",
+  seriesColors: {
+    inputTokenAccent: "#10a37f",
+    outputTokenAccent: "#0d0d0d",
+  },
+  swatchColors: ["#0d0d0d", "#ffffff", "#10a37f"],
 };
 
 export const midnightTheme: DashboardTheme = {
@@ -229,16 +274,16 @@ export const nousBlueTheme: DashboardTheme = {
  */
 export const defaultLargeTheme: DashboardTheme = {
   name: "default-large",
-  label: "Hermes Teal (Large)",
-  description: "Hermes Teal with bigger fonts and roomier spacing",
+  label: "CommonAgent Dark (Large)",
+  description: "CommonAgent Dark with bigger fonts and roomier spacing",
   palette: defaultTheme.palette,
   typography: {
-    ...DEFAULT_TYPOGRAPHY,
+    ...COMMON_TYPOGRAPHY,
     baseSize: "18px",
     lineHeight: "1.65",
   },
   layout: {
-    ...DEFAULT_LAYOUT,
+    ...COMMON_LAYOUT,
     density: "spacious",
   },
 };
@@ -246,6 +291,7 @@ export const defaultLargeTheme: DashboardTheme = {
 export const BUILTIN_THEMES: Record<string, DashboardTheme> = {
   default: defaultTheme,
   "default-large": defaultLargeTheme,
+  "common-light": commonLightTheme,
   "nous-blue": nousBlueTheme,
   midnight: midnightTheme,
   ember: emberTheme,

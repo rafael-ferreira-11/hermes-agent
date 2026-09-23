@@ -48,28 +48,27 @@
 /* ------------------------------------------------------------------ */
 
 :root {
-  /* LENS_0 — from design-language/src/ui/components/overlays/index.tsx.
-     These are the defaults for the `default` (Hermes Teal) dashboard theme;
-     ThemeProvider rewrites them as inline styles when a user switches themes. */
+  /* CommonAgent Dark — the default dashboard theme. ThemeProvider rewrites
+     these as inline styles when a user switches themes. */
   --foreground: color-mix(in srgb, #ffffff 0%, transparent);
   --foreground-base: #ffffff;
   --foreground-alpha: 0;
-  --midground: color-mix(in srgb, #ffe6cb 100%, transparent);
-  --midground-base: #ffe6cb;
+  --midground: color-mix(in srgb, #ececec 100%, transparent);
+  --midground-base: #ececec;
   --midground-alpha: 1;
-  --background: color-mix(in srgb, #041c1c 100%, transparent);
-  --background-base: #041c1c;
+  --background: color-mix(in srgb, #212121 100%, transparent);
+  --background-base: #212121;
   --background-alpha: 1;
 
-  /* Typography tokens — rewritten by ThemeProvider. Defaults match the
-     system stack so themes that don't override look native. */
-  --theme-font-sans: system-ui, -apple-system, "Segoe UI", Roboto,
+  /* Typography tokens — rewritten by ThemeProvider. Inter is loaded by the
+     theme's fontUrl; the system stack keeps first paint native. */
+  --theme-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
-  --theme-font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
+  --theme-font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Mono", Menlo,
     Consolas, monospace;
   --theme-font-display: var(--theme-font-sans);
-  --theme-base-size: 15px;
-  --theme-line-height: 1.55;
+  --theme-base-size: 16px;
+  --theme-line-height: 1.5;
   --theme-letter-spacing: 0;
 
   /* Layout tokens. */
@@ -78,14 +77,9 @@
   --theme-spacing-mul: 1;
   --theme-density: comfortable;
 
-  /* Data-series accents — consumed by Analytics + Models pages for the
-     input-vs-output token visualisations (chart bars, table values,
-     legend swatches). Defaults are tuned for the Hermes-teal LENS_0
-     look: cream input + emerald-400 output read as warm/cool against
-     the dark canvas. Themes override via ThemeProvider, which emits
-     these as `--series-input-token` / `--series-output-token`. */
-  --series-input-token: #ffe6cb;
-  --series-output-token: #34d399;
+  /* Data-series accents — Analytics + Models pages. */
+  --series-input-token: #10a37f;
+  --series-output-token: #ececec;
 }
 
 /* Theme tokens cascade into the document root so every descendant inherits

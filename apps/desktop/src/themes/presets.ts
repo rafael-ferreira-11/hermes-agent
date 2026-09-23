@@ -55,6 +55,61 @@ export const DEFAULT_TYPOGRAPHY: DesktopThemeTypography = { fontSans: SYSTEM_SAN
  * them; separate presets are what let nous's accent move without silently
  * redefining what "GitHub" means.
  */
+/**
+ * CommonAgent — the default skin. First-party ChatGPT-like palette from
+ * `@hermes/shared`; Inter approximates ChatGPT's Söhne.
+ */
+export const commonagentTheme: DesktopTheme = {
+  name: 'commonagent',
+  label: 'CommonAgent',
+  description: 'Soft charcoal and white — the CommonAgent look',
+  ...THEME_PRESET_PALETTES.commonagent,
+  typography: {
+    fontSans: `"Inter", ${SYSTEM_SANS}`,
+    fontMono: `"JetBrains Mono", ${SYSTEM_MONO}`,
+    fontUrl:
+      'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap'
+  },
+  terminal: {
+    foreground: '#0d0d0d',
+    black: '#212121',
+    red: '#d92d20',
+    green: '#1a7f37',
+    yellow: '#b58900',
+    blue: '#0057b7',
+    magenta: '#8250df',
+    cyan: '#1b7c83',
+    white: '#5d5d5d',
+    brightBlack: '#5d5d5d',
+    brightRed: '#f24338',
+    brightGreen: '#2ea043',
+    brightYellow: '#d29922',
+    brightBlue: '#218bff',
+    brightMagenta: '#a475f9',
+    brightCyan: '#3192aa',
+    brightWhite: '#8c959f'
+  },
+  darkTerminal: {
+    foreground: '#ececec',
+    black: '#2f2f2f',
+    red: '#f85149',
+    green: '#3fb950',
+    yellow: '#d29922',
+    blue: '#58a6ff',
+    magenta: '#bc8cff',
+    cyan: '#39c5cf',
+    white: '#b4b4b4',
+    brightBlack: '#b4b4b4',
+    brightRed: '#ffa198',
+    brightGreen: '#56d364',
+    brightYellow: '#e3b341',
+    brightBlue: '#79c0ff',
+    brightMagenta: '#d2a8ff',
+    brightCyan: '#56d4dd',
+    brightWhite: '#ffffff'
+  }
+}
+
 export const githubTheme: DesktopTheme = {
   name: 'github',
   label: 'GitHub',
@@ -388,6 +443,7 @@ export const slateTheme: DesktopTheme = {
 }
 
 export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
+  commonagent: commonagentTheme,
   nous: nousTheme,
   github: githubTheme,
   catppuccin: catppuccinTheme,
@@ -404,4 +460,4 @@ export const BUILTIN_THEMES: Record<string, DesktopTheme> = {
 export const BUILTIN_THEME_LIST = Object.values(BUILTIN_THEMES)
 
 /** Skin used when nothing is persisted or the persisted name is retired. */
-export const DEFAULT_SKIN_NAME = 'nous'
+export const DEFAULT_SKIN_NAME = 'commonagent'

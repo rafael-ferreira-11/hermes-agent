@@ -1028,7 +1028,7 @@ const BOOT_FAKE_STEP_MS = (() => {
   return Math.max(120, raw)
 })()
 
-const APP_NAME = process.env.HERMES_DESKTOP_APP_NAME || 'Hermes'
+const APP_NAME = process.env.HERMES_DESKTOP_APP_NAME || 'CommonAgent'
 const HUD_WINDOW_TITLE = `${APP_NAME} HUD`
 const TITLEBAR_HEIGHT = 34
 const MACOS_TRAFFIC_LIGHTS_HEIGHT = 14
@@ -2585,7 +2585,7 @@ async function waitForUpdateToFinish() {
       rememberLog(`[updates] detached update finished with manual action (branch ${result.branch}): ${result.message}`)
       dialog.showMessageBox({
         type: 'warning',
-        title: 'Hermes update',
+        title: 'CommonAgent update',
         message: 'The update finished, but needs one more step',
         detail: result.message
       })
@@ -2601,7 +2601,7 @@ async function waitForUpdateToFinish() {
       void dialog
         .showMessageBox({
           type: 'error',
-          title: 'Hermes update',
+          title: 'CommonAgent update',
           message: "Hermes couldn't finish updating",
           detail:
             "You're still on the previous version and can keep using it. Try the update again, or open the update log to report the problem.\n\n" +
@@ -5435,7 +5435,7 @@ async function resolveHermesBackend(backendArgs) {
   //    is a recoverable state the GUI can drive through.
   return {
     kind: 'bootstrap-needed',
-    label: 'Hermes Agent not installed yet; bootstrap required',
+    label: 'CommonAgent backend not installed yet; bootstrap required',
     command: null,
     args: backendArgs,
     bootstrap: true,
@@ -8064,7 +8064,7 @@ function openOauthLoginWindow(baseUrl, { silent = false } = {}) {
       win = new BrowserWindow({
         width: 520,
         height: 720,
-        title: silent ? 'Connecting to Hermes Cloud agent…' : 'Sign in to Hermes gateway',
+        title: silent ? 'Connecting to CommonAgent Cloud…' : 'Sign in to CommonAgent gateway',
         autoHideMenuBar: true,
         // Silent cascade: start HIDDEN. The auto-SSO 302 chain completes in
         // well under a second, so the window normally never needs to show. We
@@ -8837,7 +8837,7 @@ async function cloudAgentSilentSignIn(dashboardUrl) {
   // interactive prompt rather than a silent cascade. Discovery already gates on
   // this, but a selection can arrive after the session lapsed.
   if (!(await hasLivePortalSession())) {
-    const err = new Error('Your Hermes Cloud session has expired. Sign in to Hermes Cloud again.') as any
+    const err = new Error('Your CommonAgent Cloud session has expired. Sign in to CommonAgent Cloud again.') as any
     err.needsCloudLogin = true
     throw err
   }

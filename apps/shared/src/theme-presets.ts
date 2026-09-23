@@ -180,6 +180,68 @@ export const THEME_PRESET_PALETTES = {
       userBubbleBorder: '#30363d'
     }
   },
+  /** CommonAgent — first-party ChatGPT-like palette: light is a white
+     canvas with near-black text and a #f9f9f9 sidebar; dark is soft
+     charcoal (#212121) with a #171717 sidebar, mirroring the web
+     dashboard's CommonAgent Dark/Light themes. */
+  commonagent: {
+    colors: {
+      background: '#ffffff',
+      foreground: '#0d0d0d',
+      card: '#f9f9f9',
+      cardForeground: '#0d0d0d',
+      muted: '#f9f9f9',
+      mutedForeground: '#5d5d5d',
+      popover: '#ffffff',
+      popoverForeground: '#0d0d0d',
+      primary: '#0d0d0d',
+      primaryForeground: '#ffffff',
+      secondary: '#ececec',
+      secondaryForeground: '#0d0d0d',
+      accent: '#f1f1f1',
+      accentForeground: '#0d0d0d',
+      border: '#e5e5e5',
+      input: '#ffffff',
+      ring: '#0d0d0d',
+      midground: '#0d0d0d',
+      midgroundForeground: '#ffffff',
+      composerRing: '#0d0d0d',
+      destructive: '#d92d20',
+      destructiveForeground: '#ffffff',
+      sidebarBackground: '#f9f9f9',
+      sidebarBorder: '#e5e5e5',
+      userBubble: '#f1f1f1',
+      userBubbleBorder: '#e5e5e5'
+    },
+    darkColors: {
+      background: '#212121',
+      foreground: '#ececec',
+      card: '#2f2f2f',
+      cardForeground: '#ececec',
+      muted: '#2f2f2f',
+      mutedForeground: '#b4b4b4',
+      popover: '#2f2f2f',
+      popoverForeground: '#ececec',
+      primary: '#ffffff',
+      primaryForeground: '#0d0d0d',
+      secondary: '#2f2f2f',
+      secondaryForeground: '#ececec',
+      accent: '#2f2f2f',
+      accentForeground: '#ececec',
+      border: '#3a3a3a',
+      input: '#212121',
+      ring: '#ececec',
+      midground: '#ececec',
+      midgroundForeground: '#0d0d0d',
+      composerRing: '#ececec',
+      destructive: '#f85149',
+      destructiveForeground: '#ffffff',
+      sidebarBackground: '#171717',
+      sidebarBorder: '#3a3a3a',
+      userBubble: '#2f2f2f',
+      userBubbleBorder: '#3a3a3a'
+    }
+  },
   catppuccin: {
     colors: {
       background: '#eff1f5',

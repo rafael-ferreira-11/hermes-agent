@@ -50,7 +50,7 @@ export const ja: Translations = {
   },
 
   app: {
-    brand: "Hermes Agent",
+    brand: "CommonAgent",
     brandShort: "HA",
     closeNavigation: "ナビゲーションを閉じる",
     closeModelTools: "モデルとツールを閉じる",
