@@ -12,6 +12,15 @@ import { ProfileRail } from './profile-switcher'
 // performs the same re-home the statusbar switcher does, on that exact
 // (gateway, profile). Single-gateway rendering must stay byte-identical.
 
+// The shipped rail hides the at-rest groups (FLEET_AT_REST_VISIBLE in
+// fleet-rail.ts); these tests pin the FEATURE, so they run with it on. The
+// shipped default is pinned separately in profile-rail-simplified.test.tsx.
+vi.mock('./fleet-rail', async importOriginal => {
+  const actual = await importOriginal<Record<string, unknown>>()
+
+  return { ...actual, FLEET_AT_REST_VISIBLE: true }
+})
+
 const navigate = vi.fn()
 const selectConnection = vi.fn()
 const selectProfile = vi.fn()

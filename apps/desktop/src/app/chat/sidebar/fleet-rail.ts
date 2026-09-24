@@ -31,6 +31,18 @@ export interface FleetGroup {
 
 export const DEFAULT_PROFILE = 'default'
 
+// ── Common Agent rail switches ─────────────────────────────────────────────
+// The desktop rail shows only the ACTIVE gateway's profiles. The at-rest
+// "This device" squares and the New/Manage profile doors were moved out
+// (profile management lives in the web app), hidden — not deleted. Flip a
+// switch to bring a piece back; the components and stores are untouched.
+// Flipping FLEET_AT_REST_VISIBLE also re-enables its e2e suite
+// (e2e/fleet-profile-rail.spec.ts keeps a synced copy of this value).
+/** At-rest gateway groups (e.g. "This device") on the profile strip. */
+export const FLEET_AT_REST_VISIBLE = false
+/** The New profile / Manage profiles doors on the rail and its dropdowns. */
+export const PROFILE_MANAGE_ACTIONS_VISIBLE = false
+
 export function fleetRouteKey(connectionId: string, profile: string): string {
   return `${connectionId}::${profile}`
 }

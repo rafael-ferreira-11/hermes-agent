@@ -50,7 +50,13 @@ import { CreateProfileDialog } from '../../profiles/create-profile-dialog'
 import { PROFILES_ROUTE } from '../../routes'
 
 import { ConnectionGlyph } from './connection-glyph'
-import { buildRestGroups, type FleetAgent, fleetRouteKey } from './fleet-rail'
+import {
+  buildRestGroups,
+  FLEET_AT_REST_VISIBLE,
+  type FleetAgent,
+  fleetRouteKey,
+  PROFILE_MANAGE_ACTIONS_VISIBLE
+} from './fleet-rail'
 import { useFleetRoster } from './use-fleet-roster'
 import { useProfilePrewarm } from './use-profile-prewarm'
 
@@ -199,49 +205,54 @@ export function ProfileSwitcher({ compact = false }: { compact?: boolean }) {
               </DropdownMenuRadioItem>
             )}
           </DropdownMenuRadioGroup>
-          {restGroups.map(group => (
-            <div data-connection-id={group.connectionId} data-slot="profile-switcher-gateway" key={group.connectionId}>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel className={cn(dropdownMenuSectionLabel, 'flex items-center gap-1.5')}>
-                <ConnectionGlyph connection={group} />
-                <span className="truncate">{group.label}</span>
-                {!group.reachable && (
-                  <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-amber-500" />
-                )}
-              </DropdownMenuLabel>
-              {[group.defaultAgent, ...group.named].map(agent => (
-                <DropdownMenuItem
-                  aria-label={p.fleet.onGateway(agent.profile, group.label)}
-                  className="min-w-0"
-                  key={agent.profile}
-                  onSelect={() => switchToRest(agent)}
-                >
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <ProfileGlyph
-                      aria-hidden="true"
-                      color={resolveProfileColor(agent.profile, colors)}
-                      isDefault={agent.isDefault}
-                      name={agent.profile}
-                    />
-                    <span className="truncate">{agent.profile}</span>
-                  </span>
-                </DropdownMenuItem>
-              ))}
-            </div>
-          ))}
+          {FLEET_AT_REST_VISIBLE &&
+            restGroups.map(group => (
+              <div data-connection-id={group.connectionId} data-slot="profile-switcher-gateway" key={group.connectionId}>
+                <DropdownMenuSeparator />
+                <DropdownMenuLabel className={cn(dropdownMenuSectionLabel, 'flex items-center gap-1.5')}>
+                  <ConnectionGlyph connection={group} />
+                  <span className="truncate">{group.label}</span>
+                  {!group.reachable && (
+                    <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-amber-500" />
+                  )}
+                </DropdownMenuLabel>
+                {[group.defaultAgent, ...group.named].map(agent => (
+                  <DropdownMenuItem
+                    aria-label={p.fleet.onGateway(agent.profile, group.label)}
+                    className="min-w-0"
+                    key={agent.profile}
+                    onSelect={() => switchToRest(agent)}
+                  >
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <ProfileGlyph
+                        aria-hidden="true"
+                        color={resolveProfileColor(agent.profile, colors)}
+                        isDefault={agent.isDefault}
+                        name={agent.profile}
+                      />
+                      <span className="truncate">{agent.profile}</span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            ))}
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
-            <Codicon aria-hidden="true" name="add" size="0.875rem" />
-            <span className="truncate">{p.newProfile}</span>
-          </DropdownMenuItem>
+          {PROFILE_MANAGE_ACTIONS_VISIBLE && (
+            <DropdownMenuItem onSelect={() => setCreateOpen(true)}>
+              <Codicon aria-hidden="true" name="add" size="0.875rem" />
+              <span className="truncate">{p.newProfile}</span>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem onSelect={() => void runImportProfileFlow()}>
             <Codicon aria-hidden="true" name="cloud-download" size="0.875rem" />
             <span className="truncate">{p.importProfile}</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => navigate(PROFILES_ROUTE)}>
-            <Codicon aria-hidden="true" name="settings-gear" size="0.875rem" />
-            <span className="truncate">{p.manageProfiles}</span>
-          </DropdownMenuItem>
+          {PROFILE_MANAGE_ACTIONS_VISIBLE && (
+            <DropdownMenuItem onSelect={() => navigate(PROFILES_ROUTE)}>
+              <Codicon aria-hidden="true" name="settings-gear" size="0.875rem" />
+              <span className="truncate">{p.manageProfiles}</span>
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 

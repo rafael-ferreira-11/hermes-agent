@@ -98,7 +98,15 @@ import { RenameProfileDialog } from '../../profiles/rename-profile-dialog'
 import { PROFILES_ROUTE, SETTINGS_ROUTE } from '../../routes'
 
 import { ConnectionGlyph } from './connection-glyph'
-import { buildRestGroups, countRestAgents, type FleetAgent, type FleetGroup, fleetRouteKey } from './fleet-rail'
+import {
+  buildRestGroups,
+  countRestAgents,
+  FLEET_AT_REST_VISIBLE,
+  type FleetAgent,
+  type FleetGroup,
+  fleetRouteKey,
+  PROFILE_MANAGE_ACTIONS_VISIBLE
+} from './fleet-rail'
 import { ProfileLaunchContextMenu, ProfileLaunchMenuSection } from './profile-launch-menu'
 import { ProfileRemoteOverrideDialog } from './profile-remote-override-dialog'
 import { useFleetRoster } from './use-fleet-roster'
@@ -225,6 +233,14 @@ export function ProfileRail() {
 
     return sequence
   }, [activeConnectionId, connections, restGroups])
+
+  // With at-rest groups hidden, a skipped leading rest entry must not leave
+  // the active gateway's divider hairline stranded at the strip's head — the
+  // first VISIBLE divider is the one that drops its hairline. Flag on, this
+  // is always 0 (the original behavior).
+  const firstVisibleFleetIndex = FLEET_AT_REST_VISIBLE
+    ? 0
+    : Math.max(0, fleetSequence.findIndex(entry => entry.kind === 'active'))
 
   // Too many profiles for the square strip → collapse to the select. Declared
   // ahead of the wheel effect, which re-binds when the strip mounts/unmounts.
@@ -487,7 +503,7 @@ export function ProfileRail() {
                   <Fragment key="active">
                     <FleetDivider
                       connection={activeConnection}
-                      first={index === 0}
+                      first={index === firstVisibleFleetIndex}
                       label={activeConnection ? p.fleet.gateway(activeConnection.label) : null}
                       reachable
                     />
@@ -512,7 +528,7 @@ export function ProfileRail() {
                       {activeStrip}
                     </span>
                   </Fragment>
-                ) : (
+                ) : FLEET_AT_REST_VISIBLE ? (
                   <FleetRestGroup
                     colors={colors}
                     first={index === 0}
@@ -525,20 +541,23 @@ export function ProfileRail() {
                     onSelect={switchToRest}
                     pendingRoute={pendingRoute}
                   />
-                )
+                ) : null
               )
             : activeStrip}
 
-          <AddProfileButton label={p.newProfile} onClick={() => setCreateOpen(true)} />
+          {PROFILE_MANAGE_ACTIONS_VISIBLE && (
+            <AddProfileButton label={p.newProfile} onClick={() => setCreateOpen(true)} />
+          )}
           <ImportProfileButton label={p.importProfile} />
         </div>
       )}
 
-      {/* Always reachable, even with only the default profile: the manage
-          overlay is the only place to edit a profile's SOUL.md, and a
-          single-profile user must be able to edit the default's persona
-          without first creating a throwaway second profile. */}
-      <ProfilePill active={false} glyph="ellipsis" label={p.manageProfiles} onSelect={() => navigate(PROFILES_ROUTE)} />
+      {/* Hidden with the other profile-management doors (see
+          PROFILE_MANAGE_ACTIONS_VISIBLE in fleet-rail.ts); the overlay itself
+          stays reachable from the command center. */}
+      {PROFILE_MANAGE_ACTIONS_VISIBLE && (
+        <ProfilePill active={false} glyph="ellipsis" label={p.manageProfiles} onSelect={() => navigate(PROFILES_ROUTE)} />
+      )}
 
       {/* Multi-gateway discoverability: before a second source exists, a plug
           pinned beside Manage deep-links to the unified Gateways page. Once
@@ -707,11 +726,11 @@ function AddProfileButton({ label, onClick }: { label: string; onClick: () => vo
     <Tip label={label}>
       <button
         aria-label={label}
-        className="grid size-5 shrink-0 place-items-center rounded-[3px] text-(--ui-text-tertiary) opacity-55 transition hover:bg-(--ui-control-hover-background) hover:text-foreground hover:opacity-100"
+        className="grid size-8 shrink-0 place-items-center rounded-md text-(--ui-text-tertiary) opacity-55 transition hover:bg-(--ui-control-hover-background) hover:text-foreground hover:opacity-100"
         onClick={onClick}
         type="button"
       >
-        <Codicon name="add" size="0.75rem" />
+        <Codicon name="add" size="1rem" />
       </button>
     </Tip>
   )
@@ -725,11 +744,11 @@ function ImportProfileButton({ label }: { label: string }) {
     <Tip label={label}>
       <button
         aria-label={label}
-        className="grid size-5 shrink-0 place-items-center rounded-[3px] text-(--ui-text-tertiary) opacity-55 transition hover:bg-(--ui-control-hover-background) hover:text-foreground hover:opacity-100"
+        className="grid size-8 shrink-0 place-items-center rounded-md text-(--ui-text-tertiary) opacity-55 transition hover:bg-(--ui-control-hover-background) hover:text-foreground hover:opacity-100"
         onClick={() => void runImportProfileFlow()}
         type="button"
       >
-        <Codicon name="cloud-download" size="0.75rem" />
+        <Codicon name="cloud-download" size="1rem" />
       </button>
     </Tip>
   )
@@ -796,10 +815,12 @@ function ProfileDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-48 max-w-72" collisionPadding={8} side="top">
-        <DropdownMenuItem onSelect={onCreate}>
-          <Codicon aria-hidden="true" name="add" size="0.875rem" />
-          <span className="truncate">{p.newProfile}</span>
-        </DropdownMenuItem>
+        {PROFILE_MANAGE_ACTIONS_VISIBLE && (
+          <DropdownMenuItem onSelect={onCreate}>
+            <Codicon aria-hidden="true" name="add" size="0.875rem" />
+            <span className="truncate">{p.newProfile}</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onSelect={onImport}>
           <Codicon aria-hidden="true" name="cloud-download" size="0.875rem" />
           <span className="truncate">{p.importProfile}</span>
@@ -816,40 +837,41 @@ function ProfileDropdown({
             />
           ))}
         </DropdownMenuRadioGroup>
-        {restGroups.map(group => (
-          <div data-connection-id={group.connectionId} data-slot="profile-dropdown-gateway" key={group.connectionId}>
-            <DropdownMenuSeparator />
-            <DropdownMenuLabel className={cn(dropdownMenuSectionLabel, 'flex items-center gap-1.5')}>
-              <ConnectionGlyph connection={group} />
-              <span className="truncate">{group.label}</span>
-              {!group.reachable && <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-amber-500" />}
-            </DropdownMenuLabel>
-            {[group.defaultAgent, ...group.named].map(agent => (
-              <ProfileLaunchContextMenu
-                connectionId={agent.connectionId}
-                key={agent.profile}
-                label={p.fleet.onGateway(agent.profile, group.label)}
-                profile={agent.profile}
-              >
-                <DropdownMenuItem
-                  aria-label={p.fleet.onGateway(agent.profile, group.label)}
-                  className="min-w-0"
-                  onSelect={() => onSelectRest(agent)}
+        {FLEET_AT_REST_VISIBLE &&
+          restGroups.map(group => (
+            <div data-connection-id={group.connectionId} data-slot="profile-dropdown-gateway" key={group.connectionId}>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel className={cn(dropdownMenuSectionLabel, 'flex items-center gap-1.5')}>
+                <ConnectionGlyph connection={group} />
+                <span className="truncate">{group.label}</span>
+                {!group.reachable && <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-amber-500" />}
+              </DropdownMenuLabel>
+              {[group.defaultAgent, ...group.named].map(agent => (
+                <ProfileLaunchContextMenu
+                  connectionId={agent.connectionId}
+                  key={agent.profile}
+                  label={p.fleet.onGateway(agent.profile, group.label)}
+                  profile={agent.profile}
                 >
-                  <span className="flex min-w-0 items-center gap-1.5">
-                    <ProfileGlyph
-                      aria-hidden="true"
-                      color={resolveProfileColor(agent.profile, colors)}
-                      isDefault={agent.isDefault}
-                      name={agent.profile}
-                    />
-                    <span className="truncate">{agent.profile}</span>
-                  </span>
-                </DropdownMenuItem>
-              </ProfileLaunchContextMenu>
-            ))}
-          </div>
-        ))}
+                  <DropdownMenuItem
+                    aria-label={p.fleet.onGateway(agent.profile, group.label)}
+                    className="min-w-0"
+                    onSelect={() => onSelectRest(agent)}
+                  >
+                    <span className="flex min-w-0 items-center gap-1.5">
+                      <ProfileGlyph
+                        aria-hidden="true"
+                        color={resolveProfileColor(agent.profile, colors)}
+                        isDefault={agent.isDefault}
+                        name={agent.profile}
+                      />
+                      <span className="truncate">{agent.profile}</span>
+                    </span>
+                  </DropdownMenuItem>
+                </ProfileLaunchContextMenu>
+              ))}
+            </div>
+          ))}
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -927,7 +949,7 @@ function ProfilePill({
         data-connection-id={connectionId}
         data-slot={slot}
         onClick={onSelect}
-        size="icon-xs"
+        size="icon-sm"
         type="button"
         variant="ghost"
       >
@@ -973,7 +995,7 @@ function FleetDivider({
   const marker = (
     <span
       aria-hidden="true"
-      className={cn('flex h-5 shrink-0 items-center gap-0.5', first ? 'mr-0.5' : 'mx-0.5')}
+      className={cn('flex h-8 shrink-0 items-center gap-0.5', first ? 'mr-0.5' : 'mx-0.5')}
       data-connection-id={connectionId}
       data-reachable={reachable}
       data-slot="profile-rail-divider"
@@ -1105,7 +1127,7 @@ function RestSquare({
                   <button
                     aria-busy={pending || undefined}
                     aria-label={label}
-                    className="relative grid size-5 shrink-0 select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold uppercase leading-none opacity-35 transition-opacity hover:opacity-100 aria-busy:opacity-100"
+                    className="relative grid size-8 shrink-0 select-none place-items-center rounded-md text-xs font-semibold uppercase leading-none opacity-35 transition-opacity hover:opacity-100 aria-busy:opacity-100"
                     data-connection-id={agent.connectionId}
                     data-profile={agent.profile}
                     data-slot="profile-rail-rest-square"
@@ -1274,7 +1296,7 @@ function ProfileSquare({
                 <TooltipTrigger asChild>
                   <button
                     className={cn(
-                      'relative grid size-5 shrink-0 cursor-grab touch-none select-none place-items-center rounded-[3px] text-[0.5625rem] font-semibold uppercase leading-none transition-opacity hover:opacity-100',
+                      'relative grid size-8 shrink-0 cursor-grab touch-none select-none place-items-center rounded-md text-xs font-semibold uppercase leading-none transition-opacity hover:opacity-100',
                       active ? 'opacity-100' : 'opacity-55',
                       isDragging && 'z-10 cursor-grabbing opacity-100'
                     )}

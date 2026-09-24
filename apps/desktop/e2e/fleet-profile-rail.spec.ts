@@ -30,6 +30,15 @@ import {
 import { startMockServer } from '../../../tests-js/scripts/mock-server'
 import { type ElectronApplication, expect, type Page, test } from './test'
 
+// Keep in sync with FLEET_AT_REST_VISIBLE in
+// src/app/chat/sidebar/fleet-rail.ts. This suite exercises the at-rest fleet
+// squares end-to-end; the shipped rail hides them, so it only runs when that
+// switch is flipped back on (the feature keeps unit coverage in
+// profile-rail-fleet.test.tsx meanwhile).
+const FLEET_AT_REST_VISIBLE = false
+
+test.skip(!FLEET_AT_REST_VISIBLE, 'at-rest fleet squares are hidden in the shipped rail (FLEET_AT_REST_VISIBLE in fleet-rail.ts)')
+
 const DESKTOP_ROOT = path.resolve(import.meta.dirname, '..')
 const REPO_ROOT = path.resolve(DESKTOP_ROOT, '..', '..')
 

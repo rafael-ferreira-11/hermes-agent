@@ -2027,7 +2027,7 @@ export function ChatSidebar({
         {/* Off, the statusbar's profile dropdown (beside the gateway switcher)
             takes over — the rail is a duplicate door for bot-only setups. */}
         {profileRailVisible && (
-          <div className="shrink-0 px-0.5 pb-1 pt-0.5">
+          <div className="shrink-0 px-0.5 pb-1.5 pt-1">
             <ProfileRail />
           </div>
         )}

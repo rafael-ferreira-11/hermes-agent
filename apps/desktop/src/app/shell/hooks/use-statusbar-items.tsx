@@ -80,6 +80,11 @@ import type { StatusbarItem } from '../statusbar-controls'
 
 const EMPTY_USAGE: UsageStats = { calls: 0, input: 0, output: 0, total: 0 }
 
+// Common Agent simplification: the client/backend version links are off the
+// statusbar's right edge (update checks keep running in the background).
+// Flip to true to restore them — both items still derive below.
+const VERSION_STATUSBAR_ITEMS_VISIBLE = false
+
 interface StatusbarItemsOptions {
   agentsOpen: boolean
   chatOpen: boolean
@@ -713,8 +718,9 @@ export function useStatusbarItems({
         toggleLabel: copy.toggleTerminal,
         variant: 'action'
       },
-      clientVersionItem,
-      ...(backendVersionItem ? [backendVersionItem] : [])
+      ...(VERSION_STATUSBAR_ITEMS_VISIBLE
+        ? [clientVersionItem, ...(backendVersionItem ? [backendVersionItem] : [])]
+        : [])
     ],
     [
       approvalModeItem,

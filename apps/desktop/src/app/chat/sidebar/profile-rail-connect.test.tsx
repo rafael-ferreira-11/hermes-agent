@@ -114,7 +114,9 @@ describe('ProfileRail multi-gateway entry point', () => {
     // The whole point is first-run discoverability: the pill must not be
     // gated behind multiProfile the way the default↔all toggle is.
     expect(screen.getByRole('button', { name: 'Manage gateways…' })).toBeTruthy()
-    expect(screen.getByRole('button', { name: 'Manage profiles…' })).toBeTruthy()
+    // The Manage profiles door is hidden by the simplified rail (see
+    // PROFILE_MANAGE_ACTIONS_VISIBLE in fleet-rail.ts).
+    expect(screen.queryByRole('button', { name: 'Manage profiles…' })).toBeNull()
   })
 
   it('keeps the active profile explicit when gateway identity moves to the statusbar', () => {
@@ -123,6 +125,6 @@ describe('ProfileRail multi-gateway entry point', () => {
 
     expect(screen.getByRole('button', { name: 'default' })).toBeTruthy()
     expect(screen.queryByRole('button', { name: 'Manage gateways…' })).toBeNull()
-    expect(screen.getByRole('button', { name: 'Manage profiles…' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Manage profiles…' })).toBeNull()
   })
 })
