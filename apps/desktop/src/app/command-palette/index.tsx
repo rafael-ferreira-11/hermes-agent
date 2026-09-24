@@ -35,7 +35,6 @@ import {
   Download,
   Egg,
   GitBranch,
-  Globe,
   type IconComponent,
   Info,
   KeyRound,
@@ -393,45 +392,18 @@ const toSessionEntry = (session: SessionRow): SessionEntry => ({
   title: sessionTitle(session)
 })
 
-type NonConfigSettingsLabel =
-  'about' | 'archivedChats' | 'gateway' | 'keysSettings' | 'keysTools' | 'mcp' | 'providerAccounts' | 'providerApiKeys'
+type NonConfigSettingsLabel = 'about' | 'archivedChats' | 'keysSettings' | 'keysTools'
 
+// v0 scope: the Providers and Gateways settings tabs are hidden — billing is
+// webapp-only and provider/gateway setup happens outside this app — so they
+// get no palette rows either. Their settings views still render for flows
+// that deep-link straight to them.
 const NON_CONFIG_SETTINGS: ReadonlyArray<{
   icon: IconComponent
   keywords?: string[]
   labelKey: NonConfigSettingsLabel
   tab: string
 }> = [
-  {
-    icon: Zap,
-    keywords: ['accounts', 'sign in', 'oauth', 'login', 'subscription', 'models', 'anthropic', 'openai'],
-    labelKey: 'providerAccounts',
-    tab: 'providers&pview=accounts'
-  },
-  {
-    icon: KeyRound,
-    keywords: ['providers', 'api key', 'keys', 'secrets', 'tokens', 'egress', 'iron proxy', 'sandbox proxy'],
-    labelKey: 'providerApiKeys',
-    tab: 'providers&pview=keys'
-  },
-  {
-    icon: Globe,
-    // The Connections registry merged into the unified Gateways page.
-    keywords: [
-      'connection',
-      'connections',
-      'messaging',
-      'remote',
-      'multi',
-      'instances',
-      'ssh',
-      'cloud',
-      'add gateway',
-      'registry'
-    ],
-    labelKey: 'gateway',
-    tab: 'gateway'
-  },
   {
     icon: KeyRound,
     keywords: ['api', 'secrets', 'tokens', 'credentials', 'browser', 'search'],

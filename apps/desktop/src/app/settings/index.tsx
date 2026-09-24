@@ -2,7 +2,6 @@ import { useStore } from '@nanostores/react'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router'
 
-import { codiconIcon } from '@/components/ui/codicon'
 import { KbdCombo } from '@/components/ui/kbd'
 import { Tip } from '@/components/ui/tooltip'
 import { getHermesConfigDefaults, getHermesConfigRecord, saveHermesConfig } from '@/hermes'
@@ -10,11 +9,8 @@ import { useI18n } from '@/i18n'
 import { triggerHaptic } from '@/lib/haptics'
 import {
   Archive,
-  BarChart3,
   Bell,
-  Cpu,
   Download,
-  Globe,
   Info,
   Keyboard,
   KeyRound,
@@ -23,8 +19,7 @@ import {
   Settings2,
   ShieldLock,
   Upload,
-  Wrench,
-  Zap
+  Wrench
 } from '@/lib/icons'
 import { isEditableTarget } from '@/lib/keybinds/combo'
 import { typeToFocusChar } from '@/lib/keybinds/composer-focus-keys'
@@ -33,7 +28,6 @@ import { $commandPaletteOpen, openCommandPalettePage } from '@/store/command-pal
 import { confirm } from '@/store/confirm'
 import { $activeConnectionId } from '@/store/connections'
 import { bindingsFor } from '@/store/keybinds'
-import { $localModelsEnabled } from '@/store/local-models-flag'
 import { notifyError } from '@/store/notifications'
 import { $settingsScopeProfile } from '@/store/settings-scope'
 
@@ -44,8 +38,7 @@ import { OverlayView } from '../overlays/overlay-view'
 
 import { AboutSettings } from './about-settings'
 import { AppearanceSettings } from './appearance-settings'
-import { BILLING_VIEWS, BillingSettings, type BillingSubView } from './billing'
-import { deriveBillingView, useBillingState, useSubscriptionState } from './billing/use-billing-state'
+import { BillingSettings } from './billing'
 import { ConfigSettings } from './config-settings'
 import { SECTIONS } from './constants'
 import { GatewaySettings } from './gateway-settings'
@@ -149,14 +142,10 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
     }
   }, [activeView, setActiveView])
   // Providers subnav (Accounts vs API keys) lives in its own param so each
-  // sub-view is deep-linkable and survives a refresh.
+  // sub-view is deep-linkable and survives a refresh. The tab is hidden from
+  // the nav in v0, but the view still renders when a flow deep-links to it.
   const [providerView, setProviderView] = useRouteEnumParam<ProviderView>('pview', PROVIDER_VIEWS, 'accounts')
   const [keysView] = useRouteEnumParam<KeysView>('kview', KEYS_VIEWS, 'tools')
-  const [billingView] = useRouteEnumParam<BillingSubView>('bview', BILLING_VIEWS, 'overview')
-  const billingState = useBillingState()
-  const subscriptionState = useSubscriptionState()
-  const billingPresentation = deriveBillingView(billingState.data, subscriptionState.data)
-  const canViewPlans = billingPresentation.status === 'normal' && Boolean(billingPresentation.plan?.action)
 
   // Jump to a section + its sub-view in one navigate. Two sequential setters
   // would each read the same stale `search` and the second would clobber the
@@ -181,11 +170,6 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
       navigate({ hash, pathname, search: qs ? `?${qs}` : '' }, { replace: true })
     },
     [hash, navigate, pathname, search]
-  )
-
-  const openProviderView = useCallback(
-    (view: ProviderView) => openSubView('providers', 'pview', view, 'accounts'),
-    [openSubView]
   )
 
   const openKeysView = useCallback((view: KeysView) => openSubView('keys', 'kview', view, 'tools'), [openSubView])
@@ -267,88 +251,14 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
             label: t.settings.nav.notifications,
             onSelect: () => setActiveView('notifications')
           },
-          {
-            active: activeView === 'billing',
-            children: [
-              {
-                active: activeView === 'billing' && (billingView === 'overview' || !canViewPlans),
-                icon: BarChart3,
-                id: 'bview:overview',
-                label: t.settings.subpages.billingOverview,
-                onSelect: () => openSubView('billing', 'bview', 'overview', 'overview')
-              },
-              ...(canViewPlans
-                ? [
-                    {
-                      active: activeView === 'billing' && billingView === 'plans',
-                      icon: BarChart3,
-                      id: 'bview:plans',
-                      label: t.settings.subpages.billingPlans,
-                      onSelect: () => openSubView('billing', 'bview', 'plans', 'overview')
-                    }
-                  ]
-                : [])
-            ],
-            icon: BarChart3,
-            id: 'billing',
-            label: t.settings.nav.billing,
-            onSelect: () => setActiveView('billing')
-          },
-          {
-            active: activeView === 'providers',
-            children: [
-              {
-                active: activeView === 'providers' && providerView === 'accounts',
-                icon: codiconIcon('account'),
-                id: 'pview:accounts',
-                label: t.settings.nav.providerAccounts,
-                onSelect: () => openProviderView('accounts')
-              },
-              {
-                active: activeView === 'providers' && providerView === 'keys',
-                icon: KeyRound,
-                id: 'pview:keys',
-                label: t.settings.nav.providerApiKeys,
-                onSelect: () => openProviderView('keys')
-              },
-              {
-                active: activeView === 'providers' && providerView === 'custom-endpoints',
-                icon: Globe,
-                id: 'pview:custom-endpoints',
-                label: t.settings.nav.providerCustomEndpoints,
-                onSelect: () => openProviderView('custom-endpoints')
-              },
-              // Local models ships behind the --local launch flag: no flag, no
-              // nav entry (the pane itself also refuses to render, so a stale
-              // ?pview=local deep link falls back to accounts-shaped emptiness
-              // rather than a hidden feature).
-              ...($localModelsEnabled.get()
-                ? [
-                    {
-                      active: activeView === 'providers' && providerView === 'local',
-                      icon: Cpu,
-                      id: 'pview:local',
-                      label: t.settings.nav.providerLocalModels,
-                      onSelect: () => openProviderView('local')
-                    }
-                  ]
-                : [])
-            ],
-            gapBefore: true,
-            icon: Zap,
-            id: 'providers',
-            label: t.settings.nav.providers,
-            onSelect: () => setActiveView('providers')
-          },
-          {
-            active: activeView === 'gateway',
-            icon: Globe,
-            id: 'gateway',
-            label: t.settings.nav.gateway,
-            onSelect: () => setActiveView('gateway')
-          },
+          // v0 scope: Billing, Providers, and Gateways are hidden from the nav —
+          // billing is webapp-only and provider/gateway setup is handled outside
+          // this app. The views stay registered in SETTINGS_VIEWS so recovery
+          // flows that deep-link straight to them (gateway sign-in errors, image
+          // provider setup) keep working; they just have no nav row.
           {
             active: activeView === 'keybinds',
+            gapBefore: true,
             icon: Keyboard,
             id: 'keybinds',
             label: t.settings.nav.keybinds,
@@ -412,17 +322,12 @@ export function SettingsView({ onClose, onConfigSaved, onMainModelChanged }: Set
       }),
     [
       activeView,
-      billingView,
-      canViewPlans,
       keysView,
-      providerView,
       subpage,
       t,
       setActiveView,
-      openProviderView,
       openKeysView,
-      openSettingsPage,
-      openSubView
+      openSettingsPage
     ]
   )
 

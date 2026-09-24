@@ -21,8 +21,10 @@ import {
 import { ListRow, SectionHeading, SettingsContent } from './primitives'
 import { UninstallSection } from './uninstall-section'
 
-const RELEASE_NOTES_URL = 'https://github.com/NousResearch/hermes-agent/releases'
-const INSTALLER_URL = 'https://hermes-agent.nousresearch.com/'
+// v0: CommonAgent ships its own releases — these point at our fork and product
+// site, never at the upstream project.
+const RELEASE_NOTES_URL = 'https://github.com/rafael-ferreira-11/hermes-agent/releases'
+const INSTALLER_URL = 'https://commonagent.app'
 
 function relativeTime(ms: number | undefined, a: Translations['settings']['about']) {
   if (!ms) {
@@ -121,6 +123,7 @@ function AppUpdatesSettings({ includeUninstall }: { includeUninstall: boolean })
         <BrandMark className="size-16" />
         <div>
           <h2 className="text-lg font-semibold tracking-tight">{a.heading}</h2>
+          <p className="mt-0.5 text-sm text-muted-foreground">{a.tagline}</p>
           <p className="mt-1 text-xs text-muted-foreground">
             {version?.appVersion ? a.version(version.appVersion) : a.versionUnavailable}
           </p>

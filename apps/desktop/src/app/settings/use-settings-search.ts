@@ -276,17 +276,24 @@ export function useSettingsSearchCatalog(enabled: boolean) {
     sessions: t.settings.nav.archivedChats
   }
 
+  // v0: hidden tabs (Gateways — billing and providers have no subpages) stay
+  // out of the palette's settings search; their pages still resolve when a
+  // flow deep-links straight to them.
+  const HIDDEN_SEARCH_VIEWS = new Set(['gateway'])
+
   const subpageEntries: SettingsSearchEntry[] = [
     ...SECTIONS.map(section => ({
       view: `config:${section.id}` as SettingsView,
       label: t.settings.sections[section.id] ?? section.label,
       icon: section.icon
     })),
-    ...Object.keys(OTHER_SUBPAGES).map(view => ({
-      view: view as SettingsView,
-      label: pageLabels[view],
-      icon: Settings2
-    }))
+    ...Object.keys(OTHER_SUBPAGES)
+      .filter(view => !HIDDEN_SEARCH_VIEWS.has(view))
+      .map(view => ({
+        view: view as SettingsView,
+        label: pageLabels[view],
+        icon: Settings2
+      }))
   ].flatMap(parent =>
     settingsSubpages(parent.view).map(page => ({
       context: parent.label,

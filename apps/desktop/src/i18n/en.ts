@@ -1017,7 +1017,7 @@ export const en: Translations = {
       advanced: 'Advanced'
     },
     searchPlaceholder: {
-      about: 'About Hermes Desktop',
+      about: 'About CommonAgent',
       config: 'Search settings...',
       gateway: 'Gateway connection...',
       keys: 'Search API keys...',
@@ -1209,6 +1209,7 @@ export const en: Translations = {
     },
     about: {
       heading: 'CommonAgent Desktop',
+      tagline: 'Smarter Together',
       version: value => `Version ${value}`,
       versionUnavailable: 'Version unavailable',
       bundleOutOfSync: 'App build out of date',

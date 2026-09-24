@@ -41,7 +41,6 @@ import { type ChatMessage, chatMessageText } from '@/lib/chat-messages'
 import { isMessagingSource } from '@/lib/session-source'
 import { activateWakeIndicator } from '@/lib/wake-indicator'
 import { playWakeSound } from '@/lib/wake-sound'
-import { $billingSettingsRequest } from '@/store/billing-block'
 import { $desktopBoot } from '@/store/boot'
 import { requestVoiceConversationStart } from '@/store/composer'
 import { $activeConnectionId } from '@/store/connections'
@@ -196,10 +195,6 @@ export function ContribWiring({ children }: { children: ReactNode }) {
 
   const busyRef = useRef(false)
   const creatingSessionRef = useRef(false)
-  // Billing recovery routes to Settings → Billing from surfaces without router
-  // context (the sticky toast). The shell owns `navigate`, so it consumes the
-  // intent counter here; the ref skips the initial mount value.
-  const billingSettingsSeenRef = useRef(0)
   const poolLimitsSettingsSeenRef = useRef(0)
   const routeRequestSeenRef = useRef(0)
   const backendRestartSeenRef = useRef(0)
@@ -212,7 +207,6 @@ export function ContribWiring({ children }: { children: ReactNode }) {
 
   const gatewayState = useStore($gatewayState)
   const activeSessionId = useStore($activeSessionId)
-  const billingSettingsRequest = useStore($billingSettingsRequest)
   const poolLimitsSettingsRequest = useStore($poolLimitsSettingsRequest)
   const routeRequest = useStore($routeRequest)
   const backendRestartRequest = useStore($backendRestartRequest)
@@ -255,19 +249,6 @@ export function ContribWiring({ children }: { children: ReactNode }) {
         .catch(err => notifyError(err, translateNow('notifications.errors.restartHermesFailed')))
     }
   }, [backendRestartRequest])
-
-  // eslint-disable-next-line no-restricted-syntax -- one-shot request-seen sentinel, not an atom mirror
-  useEffect(() => {
-    if (billingSettingsRequest === billingSettingsSeenRef.current) {
-      return
-    }
-
-    billingSettingsSeenRef.current = billingSettingsRequest
-
-    if (billingSettingsRequest > 0) {
-      navigate(`${SETTINGS_ROUTE}?tab=billing`)
-    }
-  }, [billingSettingsRequest, navigate])
 
   // Pool-cap recovery is fired by the notification action, which has no router
   // context. Keep navigation user-initiated: the counter changes only when the

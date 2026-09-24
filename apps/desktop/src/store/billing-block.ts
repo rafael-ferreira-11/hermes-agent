@@ -18,12 +18,10 @@ export interface ActiveBillingBlock {
 
 export const $billingBlock = atom<ActiveBillingBlock | null>(null)
 
-/**
- * Navigation intent counter. A toast fired outside React (or any surface
- * without router context) bumps this to ask the shell — which owns
- * `useNavigate` — to open Settings → Billing in-app. See `contrib/wiring.tsx`.
- */
-export const $billingSettingsRequest = atom(0)
+// v0: billing is webapp-only. The app has no billing surface, so every
+// recovery path that used to open Settings → Billing lands on the CommonAgent
+// site, where billing lives after sign-up.
+const WEBAPP_BILLING_URL = 'https://commonagent.app'
 
 export function setBillingBlock(sessionId: string, block: BillingBlock): void {
   $billingBlock.set({ at: Date.now(), block, sessionId })
@@ -36,8 +34,8 @@ export function clearBillingBlock(sessionId?: string): void {
     return
   }
 
-  // A scoped clear (new turn on session X) must not wipe a block raised by a
-  // different session's provider.
+  // A scoped clear (new turn on session X) must not wipe a block raised by
+  // a different session's provider.
   if (sessionId && current.sessionId !== sessionId) {
     return
   }
@@ -45,30 +43,15 @@ export function clearBillingBlock(sessionId?: string): void {
   $billingBlock.set(null)
 }
 
-export function requestBillingSettings(): void {
-  $billingSettingsRequest.set($billingSettingsRequest.get() + 1)
-}
-
 /**
  * The single recovery action for a billing wall, shared by the toast and the
- * in-chat banner so both behave identically: Nous routes to the in-app
- * Settings → Billing surface; a third-party provider deep-links to its own
- * billing page (falling back to the in-app surface only if we have no URL).
+ * in-chat banner so both behave identically: a third-party provider
+ * deep-links to its own billing page; everything else (Nous-style blocks,
+ * providers without a URL) goes to the CommonAgent webapp, where billing is
+ * handled after sign-up.
  */
 export function runBillingRecovery(block: BillingBlock): void {
-  if (block.is_nous) {
-    requestBillingSettings()
-
-    return
-  }
-
-  if (block.billing_url) {
-    openExternalLink(block.billing_url)
-
-    return
-  }
-
-  requestBillingSettings()
+  openExternalLink(block.billing_url ?? WEBAPP_BILLING_URL)
 }
 
 export function billingCtaLabel(block: BillingBlock, copy: { addCredits: string; openBilling: string }): string {

@@ -112,7 +112,7 @@ describe('BlockerView', () => {
 
     await renderUpdatesOverlay()
 
-    expect(screen.getByText('Close other processes to update Hermes')).toBeTruthy()
+    expect(screen.getByText('Close other processes to update CommonAgent')).toBeTruthy()
     expect(screen.getByText('python.exe')).toBeTruthy()
     expect(screen.queryByText('Update didn’t finish')).toBeNull()
   })
@@ -136,7 +136,7 @@ describe('BlockerView', () => {
       />
     )
 
-    expect(screen.getByText('Close other processes to update Hermes')).toBeTruthy()
+    expect(screen.getByText('Close other processes to update CommonAgent')).toBeTruthy()
     expect(screen.getByText('python.exe')).toBeTruthy()
     expect(screen.getByText('PID 58636')).toBeTruthy()
     expect(screen.getByText(/can’t safely close these processes automatically/i)).toBeTruthy()

@@ -1007,6 +1007,7 @@ export interface Translations {
     }
     about: {
       heading: string
+      tagline: string
       version: (value: string) => string
       versionUnavailable: string
       bundleOutOfSync: string
