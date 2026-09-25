@@ -3462,6 +3462,8 @@ export interface Translations {
       toggleSessionTimer: string
       toggleTerminal: string
       toggleTokensPerSecond: string
+      toggleSessionCost: string
+      sessionCostTitle: string
       toggleVersion: string
       toggleFreeTier: string
       toggleWorkspace: string
@@ -3759,6 +3761,7 @@ export interface Translations {
       thoughtBriefly: string
       thoughtFor: (duration: string) => string
       turnDuration: (duration: string) => string
+      turnUsage: (input: string, output: string, cost: string) => string
       today: (time: string) => string
       yesterday: (time: string) => string
       copy: string

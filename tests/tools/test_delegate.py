@@ -763,6 +763,7 @@ class TestSubagentCostRollup(unittest.TestCase):
             mock_child.session_prompt_tokens = 1000
             mock_child.session_completion_tokens = 200
             mock_child.session_estimated_cost_usd = 0.42
+            mock_child.session_actual_cost_usd = 0.0
             mock_child.run_conversation.return_value = {
                 "final_response": "done",
                 "completed": True,

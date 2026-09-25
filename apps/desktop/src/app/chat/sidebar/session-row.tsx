@@ -9,12 +9,14 @@ import { startSessionDrag } from '@/app/chat/session-drag'
 import { PlatformAvatar } from '@/app/messaging/platform-icon'
 import { openSession } from '@/app/open-session'
 import { formatMessageTimestamp } from '@/components/assistant-ui/thread/timestamp'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Codicon } from '@/components/ui/codicon'
 import { OverflowTip, Tip } from '@/components/ui/tooltip'
 import type { SessionInfo } from '@/hermes'
 import { type Translations, useI18n } from '@/i18n'
 import { sessionTitle } from '@/lib/chat-runtime'
+import { formatUsdCost } from '@/lib/cost-format'
 import { pathLeaf } from '@/lib/display-path'
 import { triggerHaptic } from '@/lib/haptics'
 import { middleClickHandlers } from '@/lib/middle-click'
@@ -183,14 +185,17 @@ function SidebarSessionRowImpl({
   const totalTokens = session.input_tokens + session.output_tokens
   const cost = sessionCostUsd(session)
 
-  // Tokens, cost and age share one figure rather than each claiming a column:
+  // Cost becomes a pill (the honest formatter keeps sub-cent spend visible as
+  // "~$0.0046" instead of rounding it to a "$0.00" that reads as a bug) while
+  // tokens stay a plain figure — the two stopped being one string. Zero/absent
+  // still renders no pill at all: a cost column of "$0.00" rows is noise.
+  const costPill = rowMeta.includes('cost') && cost > 0 ? formatUsdCost(cost) : null
+
+  // Tokens and age share one figure rather than each claiming a column:
   // several switched on read as one number, not as a widening gutter.
-  const figures = [
-    rowMeta.includes('tokens') && totalTokens > 0 ? compactNumber(totalTokens) : null,
-    // Sub-cent spend rounds to "$0.00", which reads as a bug rather than as a
-    // cheap session — below a cent the row says nothing at all.
-    rowMeta.includes('cost') && cost >= 0.01 ? `$${cost.toFixed(2)}` : null
-  ].filter(Boolean) as string[]
+  const figures = [rowMeta.includes('tokens') && totalTokens > 0 ? compactNumber(totalTokens) : null].filter(
+    Boolean
+  ) as string[]
 
   // Everything the Show menu puts after the title shares ONE right-aligned
   // slot, in reading order: identity chips, then the figures. The kebab covers
@@ -211,22 +216,37 @@ function SidebarSessionRowImpl({
 
   const showAge = pinnedAge || card
 
+  // The pill ends the slot whenever it shows, so it — not the figures/age —
+  // is the thing that steps aside for the kebab on hover.
+  const pillEndsSlot = Boolean(costPill)
+
   if (figures.length || showAge) {
     // The card's meta lines separate by spacing alone, so its header figures
     // match (non-breaking pair — plain spaces collapse to one); the one-line
     // row keeps the interpunct between joined figures.
     const sep = card ? '\u00A0\u00A0' : ' · '
-    const head = (showAge ? figures : figures.slice(0, -1)).join(sep)
+    // The last figure only drops into the tail span when it is the slot's
+    // last thing (no age, no pill after it); otherwise every figure stays.
+    const lastFigureTakesTail = !showAge && !pillEndsSlot
+    const head = (lastFigureTakesTail ? figures.slice(0, -1) : figures).join(sep)
 
     trailing.push({
       key: 'figures',
       node: (
         <span className="pointer-events-none whitespace-nowrap text-[0.625rem] leading-none text-(--ui-text-tertiary)">
           {head}
-          {/* The figures own their tail: the separator goes with it. */}
-          <span className={cn('inline-block text-right', TAIL_HIDES)}>
-            {head && sep}
-            {showAge ? (
+          {lastFigureTakesTail && (
+            /* The figures own their tail: the separator goes with it. */
+            <span className={cn('inline-block text-right', TAIL_HIDES)}>
+              {head && sep}
+              {figures.at(-1)}
+            </span>
+          )}
+          {showAge && (
+            /* Cards always paint the age; it only yields to the kebab when
+               it is the last thing in the slot (the pill takes over below). */
+            <span className={cn('inline-block text-right', !pillEndsSlot && TAIL_HIDES)}>
+              {head && sep}
               <Tip label={absoluteAge} side="top">
                 <time
                   aria-label={`${age}, ${absoluteAge}`}
@@ -237,17 +257,27 @@ function SidebarSessionRowImpl({
                   {age}
                 </time>
               </Tip>
-            ) : (
-              figures.at(-1)
-            )}
-          </span>
+            </span>
+          )}
         </span>
       )
     })
   }
 
-  // A chip that ends the slot hides whole; the figures handle their own tail.
-  const chipEndsSlot = trailing.length > 0 && !figures.length && !pinnedAge
+  if (costPill) {
+    trailing.push({
+      key: 'cost',
+      node: (
+        <Badge size="xs" variant="muted">
+          {costPill}
+        </Badge>
+      )
+    })
+  }
+
+  // A chip that ends the slot hides whole; the figures handle their own tail
+  // — and the cost pill is a chip that ends the slot whenever it shows.
+  const chipEndsSlot = trailing.length > 0 && (pillEndsSlot || (!figures.length && !pinnedAge))
   // A handed-off session's live source is local, but it originated on a
   // messaging platform — surface that origin as a small badge so e.g. a
   // Telegram thread continued here still reads as Telegram.

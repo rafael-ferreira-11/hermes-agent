@@ -11,9 +11,10 @@ model/provider. Logger name stays ``agent.conversation_loop`` for caplog parity.
 from __future__ import annotations
 
 import logging
+import math
 from contextlib import suppress
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from agent.image_token_cost import calibrate_from_usage
 from agent.usage_anchor import capture_usage_anchor, set_usage_anchor
@@ -70,6 +71,24 @@ def _fold_moa_usage(agent, canonical_usage):
     return _moa_client, canonical_usage, _moa_ref_cost
 
 
+def _reported_actual_cost(canonical_usage: Any) -> Optional[float]:
+    """The USD cost the generation API reported for this call, when it does. OpenRouter
+    puts ``usage.cost`` on its replies, and a billing gateway in front of any provider
+    stamps the same field with the price its own rate card bills (jev-gateway); extra
+    fields survive ``normalize_usage`` in ``raw_usage``. Only a non-negative finite
+    number counts — anything else falls back to the estimate."""
+    raw = getattr(canonical_usage, "raw_usage", None)
+    if not isinstance(raw, dict):
+        return None
+    cost = raw.get("cost")
+    if isinstance(cost, bool) or not isinstance(cost, (int, float)):
+        return None
+    cost = float(cost)
+    if not math.isfinite(cost) or cost < 0:
+        return None
+    return cost
+
+
 def record_response_usage(
     agent: Any, response: Any, *, messages: List[Dict[str, Any]], api_call_count: int,
     api_duration: float, compression_attempts: int, max_compression_attempts: int,
@@ -99,6 +118,8 @@ def record_response_usage(
         return ResponseUsageOutcome(compression_attempts=compression_attempts, rearmed=rearmed)
 
     canonical_usage = normalize_usage(response.usage, provider=agent.provider, api_mode=agent.api_mode)
+    # Captured before the MoA fold, which replaces canonical_usage with an aggregated object.
+    reported_cost = _reported_actual_cost(canonical_usage)
     # Aggregator-only usage kept for pricing: advisor tokens are priced at each advisor's
     # OWN model rate and added as dollars below.
     aggregator_usage = canonical_usage
@@ -201,11 +222,12 @@ def record_response_usage(
     _upstream = getattr(response, "provider", None)
     if isinstance(_upstream, str) and _upstream:
         _ident += f" upstream={_upstream}"
+    _cost_txt = f" cost=${reported_cost:.6f} (reported)" if reported_cost is not None else ""
     logger.info(
-        "API call #%d: model=%s provider=%s in=%d out=%d total=%d latency=%.1fs%s%s",
+        "API call #%d: model=%s provider=%s in=%d out=%d total=%d latency=%.1fs%s%s%s",
         agent.session_api_calls, agent.model, agent.provider or "unknown",
         prompt_tokens, completion_tokens, total_tokens,
-        api_duration, _cache_pct, _ident,
+        api_duration, _cache_pct, _ident, _cost_txt,
     )
     # nous.anthropic_wire=auto: the session's wire is decided once, from this first response.
     if agent.session_api_calls == 1 and (agent.provider or "") == "nous":
@@ -225,23 +247,37 @@ def record_response_usage(
         _agg_cost_model, aggregator_usage, provider=_agg_cost_provider,
         base_url=_agg_cost_base_url, api_key=getattr(agent, "api_key", ""),
     )
-    # Cost delta = aggregator + MoA advisor cost (already priced per-advisor at each
-    # advisor's own model rate), so state.db's estimated_cost_usd matches the folded
-    # token counts.
+    # A reported cost wins and estimation is suppressed for the call, so actual and
+    # estimate never double-count (both state.db cost columns and the in-memory rollups
+    # the usage payload reports would otherwise accumulate each). The MoA advisor cost
+    # joins whichever bucket the aggregator's call landed in — it is priced per-advisor
+    # inside the MoA client either way.
     _cost_delta = None
-    if cost_result.amount_usd is not None:
-        _cost_delta = float(cost_result.amount_usd)
-        agent.session_estimated_cost_usd += _cost_delta
+    _actual_delta = reported_cost
     if _moa_ref_cost is not None:
         try:
             _moa_cost = float(_moa_ref_cost)
         except (TypeError, ValueError):  # pragma: no cover - defensive
             _moa_cost = None
         if _moa_cost is not None:
-            agent.session_estimated_cost_usd += _moa_cost
-            _cost_delta = (_cost_delta or 0.0) + _moa_cost
-    agent.session_cost_status = cost_result.status
-    agent.session_cost_source = cost_result.source
+            if _actual_delta is not None:
+                _actual_delta += _moa_cost
+            else:
+                agent.session_estimated_cost_usd += _moa_cost
+                _cost_delta = (_cost_delta or 0.0) + _moa_cost
+    if _actual_delta is not None:
+        agent.session_actual_cost_usd += _actual_delta
+        agent.session_cost_status = "actual"
+        agent.session_cost_source = "provider_generation_api"
+    else:
+        # Cost delta = aggregator + MoA advisor cost (already priced per-advisor at each
+        # advisor's own model rate), so state.db's estimated_cost_usd matches the folded
+        # token counts.
+        if cost_result.amount_usd is not None:
+            _cost_delta = float(cost_result.amount_usd)
+            agent.session_estimated_cost_usd += _cost_delta
+        agent.session_cost_status = cost_result.status
+        agent.session_cost_source = cost_result.source
 
     # Persist per-call token deltas for any session_id so non-CLI runs can't lose
     # accounting; gateway/session-store writes use absolute totals and safely overwrite
@@ -262,8 +298,9 @@ def record_response_usage(
                 cache_write_tokens=canonical_usage.cache_write_tokens,
                 reasoning_tokens=canonical_usage.reasoning_tokens,
                 estimated_cost_usd=_cost_delta,
-                cost_status=cost_result.status,
-                cost_source=cost_result.source,
+                actual_cost_usd=_actual_delta,
+                cost_status="actual" if _actual_delta is not None else cost_result.status,
+                cost_source="provider_generation_api" if _actual_delta is not None else cost_result.source,
                 billing_provider=agent.provider,
                 billing_base_url=agent.base_url,
                 billing_mode="subscription_included"

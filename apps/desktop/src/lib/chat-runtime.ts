@@ -408,6 +408,10 @@ export function toRuntimeMessage(message: ChatMessage): ThreadMessage {
         ...timelineMeta,
         ...(message.completedAt !== undefined ? { timelineCompletedAt: message.completedAt } : {}),
         ...(message.durationS !== undefined ? { durationS: message.durationS } : {}),
+        // Turn usage stamps (see ChatMessage.usage / ChatMessage.turnUsage) —
+        // the per-turn ↑/↓ tokens + cost chip next to the duration badge.
+        ...(message.usage ? { usage: message.usage } : {}),
+        ...(message.turnUsage ? { turnUsage: message.turnUsage } : {}),
         // Structured failure layer for the error card (see lib/error-surface).
         ...(message.errorSurface ? { errorSurface: message.errorSurface } : {}),
         ...reactionMeta

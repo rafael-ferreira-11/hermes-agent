@@ -586,8 +586,15 @@ def _build_result_entry(
         exit_reason = "completed" if result.get("completed", False) else "max_iterations"
         status = "completed" if usable_summary else "failed"
 
-    _cost = getattr(child, "session_estimated_cost_usd", 0.0)
-    _cost_status = getattr(child, "session_cost_status", None)
+    # The child's whole spend: gateway/provider-reported actuals plus estimates for the
+    # calls that reported none.
+    _cost = float(getattr(child, "session_actual_cost_usd", 0.0) or 0.0) + float(
+        getattr(child, "session_estimated_cost_usd", 0.0) or 0.0
+    )
+    _cost_status = (
+        "actual" if float(getattr(child, "session_actual_cost_usd", 0.0) or 0.0) > 0
+        else getattr(child, "session_cost_status", None)
+    )
     # Result entry contract: see the _run_single_child docstring.
     entry: Dict[str, Any] = {
         "task_index": task_index,
@@ -1011,10 +1018,11 @@ class _ChildRun:
         if entry.get("failure_reason"):
             # Classified verdict rides the event so every surface glosses the failure the same way.
             complete_kwargs["failure_reason"] = entry["failure_reason"]
-        _cost_usd = getattr(child, "session_estimated_cost_usd", None)
-        if _cost_usd is not None:
-            with _quiet(None):
-                complete_kwargs["cost_usd"] = float(_cost_usd)
+        _cost_usd = float(getattr(child, "session_actual_cost_usd", 0.0) or 0.0) + float(
+            getattr(child, "session_estimated_cost_usd", 0.0) or 0.0
+        )
+        with _quiet(None):
+            complete_kwargs["cost_usd"] = _cost_usd
         _safe_progress(self.child_progress_cb, "subagent.complete", **complete_kwargs)
 
     def cleanup(self, *, heartbeat: _Heartbeat, child_pool: Any, leased_cred_id: Any, close_deferred: bool) -> None:

@@ -190,7 +190,11 @@ const COMPARED_FIELDS = [
   'completedAt',
   // Turn wall-clock duration — stamps the visible "⏱ 38s" badge, so a change
   // must re-render (set once at completion; stable afterwards).
-  'durationS'
+  'durationS',
+  // Turn usage stamps (cumulative snapshot + this turn's slice) — they paint
+  // the ↑/↓ tokens chip next to the duration badge. Set once at completion.
+  'usage',
+  'turnUsage'
 ] as const
 
 const IGNORED_FIELDS = ['attachmentRefs', 'parts', 'serverRowSpan'] as const

@@ -3451,6 +3451,8 @@ export const zhHant = defineLocale({
       thoughtBriefly: '思考了片刻',
       thoughtFor: duration => `思考了 ${duration}`,
       turnDuration: duration => `本輪耗時 ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `本輪用了輸入 ${input} / 輸出 ${output} 個 token — ${cost}` : `本輪用了輸入 ${input} / 輸出 ${output} 個 token`,
       today: time => `今天，${time}`,
       yesterday: time => `昨天，${time}`,
       copy: '複製',

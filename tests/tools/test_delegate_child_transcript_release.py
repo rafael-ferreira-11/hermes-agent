@@ -86,6 +86,7 @@ def _fake_child(messages):
     child._credential_pool = None
     child._delegate_role = "leaf"
     child.session_estimated_cost_usd = 0.0123
+    child.session_actual_cost_usd = 0.0
     child.session_cost_status = "estimated"
     child.session_id = "child-sess"
     child.run_conversation.return_value = {

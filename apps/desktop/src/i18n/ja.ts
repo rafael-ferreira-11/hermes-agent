@@ -3503,6 +3503,8 @@ export const ja = defineLocale({
       thoughtBriefly: '少し思考',
       thoughtFor: duration => `${duration} 思考`,
       turnDuration: duration => `このターンの所要時間: ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `このターンのトークン数: 入力 ${input} / 出力 ${output} — ${cost}` : `このターンのトークン数: 入力 ${input} / 出力 ${output}`,
       today: time => `今日 ${time}`,
       yesterday: time => `昨日 ${time}`,
       copy: 'コピー',

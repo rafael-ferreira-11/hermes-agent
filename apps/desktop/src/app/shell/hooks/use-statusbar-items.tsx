@@ -30,7 +30,14 @@ import {
   Zap
 } from '@/lib/icons'
 import { runtimeReadinessDisplay, type RuntimeReadinessResult } from '@/lib/runtime-readiness'
-import { cacheHitLabel, contextBarLabel, LiveDuration, tokensPerSecondLabel, usageContextLabel } from '@/lib/statusbar'
+import {
+  cacheHitLabel,
+  contextBarLabel,
+  costLabel,
+  LiveDuration,
+  tokensPerSecondLabel,
+  usageContextLabel
+} from '@/lib/statusbar'
 import { useStoreSelector } from '@/lib/use-session-slice'
 import { cn } from '@/lib/utils'
 import { resolveVersionStatus } from '@/lib/version-status'
@@ -329,6 +336,7 @@ export function useStatusbarItems({
   // ticks mid-turn, message.complete after) — no extra RPC, no polling.
   const cacheHit = cacheHitLabel(currentUsage)
   const tokensPerSecond = tokensPerSecondLabel(currentUsage)
+  const sessionCost = costLabel(currentUsage)
 
   const approvalModeItem = useApprovalModeStatusbarItem(activeGatewayProfile, requestGateway)
   const systemResourcesItem = useSystemResourcesStatusbarItem()
@@ -694,6 +702,18 @@ export function useStatusbarItems({
         variant: 'text'
       },
       {
+        icon: <Codicon name="credit-card" size="0.75rem" />,
+        id: 'session-cost',
+        // Cost-awareness is a spend signal, not a diagnostic: unlike the
+        // timers/readouts it starts ON. Self-hides while the backend reports
+        // no cost at all (older backends, subscription auth) — the toggle
+        // still lists it, so it returns with the first priced turn.
+        label: sessionCost,
+        title: copy.sessionCostTitle,
+        toggleLabel: copy.toggleSessionCost,
+        variant: 'text'
+      },
+      {
         detail: <LiveDuration since={sessionStartedAt} />,
         hidden: !sessionStartedAt,
         id: 'session-timer',
@@ -737,6 +757,7 @@ export function useStatusbarItems({
       gaugeUsage,
       sessionStartedAt,
       gatewayState,
+      sessionCost,
       systemResourcesItem,
       terminalShowing,
       tokensPerSecond,

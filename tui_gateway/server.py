@@ -2006,6 +2006,17 @@ def _get_usage(agent) -> dict:
         _cache_read = int(getattr(agent, "session_cache_read_tokens", 0) or 0)
         if _prompt_total > 0 and _cache_read > 0:
             usage["cache_hit_pct"] = max(0, min(100, round(_cache_read / _prompt_total * 100)))
+    # Session spend: gateway/provider-reported actuals plus our own estimates for the calls
+    # that reported none — the two accumulate disjoint call sets, so their sum is the total.
+    # The fields are declared in contracts/common.py; clients that predate them ignore both.
+    with contextlib.suppress(Exception):  # a status-bar readout must never break usage reporting
+        _actual_cost = float(getattr(agent, "session_actual_cost_usd", 0) or 0)
+        _estimated_cost = float(getattr(agent, "session_estimated_cost_usd", 0) or 0)
+        if _actual_cost > 0 or _estimated_cost > 0:
+            usage["cost_usd"] = round(_actual_cost + _estimated_cost, 6)
+            usage["cost_status"] = (
+                "actual" if _actual_cost > 0 else (getattr(agent, "session_cost_status", None) or "estimated")
+            )
     with contextlib.suppress(Exception):  # a status-bar readout must never break usage reporting
         _lhist = list(getattr(agent, "_api_latency_history", []) or [])
         _ohist = list(getattr(agent, "_api_output_history", []) or [])

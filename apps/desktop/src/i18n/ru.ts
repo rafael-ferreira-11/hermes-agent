@@ -3479,6 +3479,8 @@ export const ru = defineLocale({
       toggleSessionTimer: 'Таймер сеанса',
       toggleTerminal: 'Терминал',
       toggleTokensPerSecond: 'Токенов в секунду',
+      toggleSessionCost: 'Стоимость сеанса',
+      sessionCostTitle: 'Накопленная стоимость сеанса — ~ означает оценку, а не цену от провайдера',
       toggleVersion: 'Версия и обновления',
       toggleWorkspace: 'Рабочее пространство',
       cacheHitRateTitle: 'Доля попаданий в кэш промпта за сеанс — кэшированные токены дешевле, чем выше, тем дешевле',
@@ -3763,6 +3765,8 @@ export const ru = defineLocale({
       thoughtBriefly: 'Кратко подумал',
       thoughtFor: duration => `Думал ${duration}`,
       turnDuration: duration => `Этот ход занял ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `Ход израсходовал ${input} входных / ${output} выходных токенов — ${cost}` : `Ход израсходовал ${input} входных / ${output} выходных токенов`,
       today: time => `Сегодня, ${time}`,
       yesterday: time => `Вчера, ${time}`,
       copy: 'Копировать',

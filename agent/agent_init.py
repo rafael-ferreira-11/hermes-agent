@@ -2276,6 +2276,7 @@ _USAGE_STATE: Dict[str, Any] = {
     "session_cache_read_tokens": 0,
     "session_cache_write_tokens": 0,
     "session_reasoning_tokens": 0,
+    "session_actual_cost_usd": 0.0,
     "session_estimated_cost_usd": 0.0,
     "session_cost_status": "unknown",
     "session_cost_source": "none",

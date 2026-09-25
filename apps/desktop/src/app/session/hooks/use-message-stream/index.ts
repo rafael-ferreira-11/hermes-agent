@@ -13,10 +13,13 @@ import {
   completeOpenTimelineParts,
   type GatewayEventPayload,
   mergeFinalAssistantText,
+  previousUsageSnapshot,
   reasoningPart,
   renderMediaTags,
   sealOpenToolParts,
   toolCallOwnerMessageId,
+  turnUsageDelta,
+  turnUsageSnapshot,
   upsertToolPart
 } from '@/lib/chat-messages'
 import type { ErrorSurface } from '@/lib/error-surface'
@@ -32,6 +35,7 @@ import { isDiskFullErrorMessage, notifyError } from '@/store/notifications'
 import { broadcastSessionsChanged } from '@/store/session-sync'
 import { upsertSubagent } from '@/store/subagents'
 import { $todosBySession, setSessionTodos } from '@/store/todos'
+import type { UsageStats } from '@/types/hermes'
 
 import type { ClientSessionState } from '../../../types'
 
@@ -608,7 +612,8 @@ export function useMessageStream({
       responsePreviewed?: boolean,
       failure?: { error: string; partial: boolean; surface?: ErrorSurface | null },
       occurredAt = Date.now() / 1000,
-      persistedTurn?: PersistedTurn | null
+      persistedTurn?: PersistedTurn | null,
+      usage?: Partial<UsageStats>
     ) => {
       let shouldHydrate = false
 
@@ -646,6 +651,13 @@ export function useMessageStream({
         const durationS = state.turnStartedAt
           ? Math.max(1, Math.round((Date.now() - state.turnStartedAt) / 1000))
           : undefined
+
+        // The session-cumulative snapshot at settle (message.complete's usage).
+        // The per-turn delta against the previous stamped snapshot is derived
+        // below, once `prev` (the message list) is in scope. Same lifetime as
+        // durationS: stamped only on turns this window watched settle, so
+        // rehydrated history (no snapshots) simply renders without the chip.
+        const usageSnapshot = turnUsageSnapshot(usage)
 
         const replaceTextPart = (parts: ChatMessagePart[], interim: boolean) => {
           const visibleFinalText = stripGeneratedImageEchoes(finalText, generatedImageEchoSources(parts)).trim()
@@ -690,6 +702,7 @@ export function useMessageStream({
             interim: false,
             recovered: false,
             ...(durationS !== undefined ? { durationS } : {}),
+            ...usageMeta,
             ...(completionError && failure?.surface ? { errorSurface: failure.surface } : {})
           }
 
@@ -720,11 +733,22 @@ export function useMessageStream({
             completedAt: occurredAt,
             branchGroupId: state.pendingBranchGroup ?? undefined,
             ...(durationS !== undefined ? { durationS } : {}),
+            ...usageMeta,
             ...(completionError && { error: completionError }),
             ...(completionError && failure?.surface ? { errorSurface: failure.surface } : {})
           })
 
         const prev = state.messages
+
+        // THIS turn's own slice of the cumulative usage: this snapshot minus
+        // the previous assistant message's stamped snapshot.
+        const usageMeta = usageSnapshot
+          ? {
+              usage: usageSnapshot,
+              turnUsage: turnUsageDelta(usageSnapshot, previousUsageSnapshot(prev))
+            }
+          : undefined
+
         let nextMessages = prev
 
         // A new prompt or correction starts another occurrence, even when its

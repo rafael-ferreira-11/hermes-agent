@@ -3905,6 +3905,8 @@ export const zh = defineLocale({
       toggleSessionTimer: '会话计时',
       toggleTerminal: '终端',
       toggleTokensPerSecond: '每秒 token 数',
+      toggleSessionCost: '会话花费',
+      sessionCostTitle: '会话累计花费 — ~ 表示估算值，而非提供商实际报价',
       toggleVersion: '版本与更新',
       toggleFreeTier: 'Free tier',
       toggleWorkspace: '工作区',
@@ -4211,6 +4213,8 @@ export const zh = defineLocale({
       thoughtBriefly: '思考了片刻',
       thoughtFor: duration => `思考了 ${duration}`,
       turnDuration: duration => `本轮耗时 ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `本轮用了输入 ${input} / 输出 ${output} 个 token — ${cost}` : `本轮用了输入 ${input} / 输出 ${output} 个 token`,
       today: time => `今天，${time}`,
       yesterday: time => `昨天，${time}`,
       copy: '复制',

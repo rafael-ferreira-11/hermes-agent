@@ -376,7 +376,9 @@ def _fire_subagent_stop_hooks(results, child_by_index, parent_agent) -> float:
 
 def _rollup_children_cost(parent_agent, children_cost_total: float) -> None:
     """Fold the children's spend into the parent's session cost (source/status
-    only set when the parent had none of its own)."""
+    only set when the parent had none of its own). The per-child totals already include
+    any gateway-reported actuals, so the rollup preserves the spend; the parent's own
+    status then labels the mixed session."""
     if children_cost_total <= 0.0:
         return
     try:

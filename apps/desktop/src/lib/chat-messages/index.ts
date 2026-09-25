@@ -26,4 +26,12 @@ export {
   withUniqueToolCallIdsWithinMessage
 } from './tool-parts'
 export type { PendingClarifyProjection, SettledClarifyProjection } from './tool-parts'
-export type { ChatMessage, ChatMessagePart, GatewayEventPayload, TimelinePartMetadata } from './types'
+export { previousUsageSnapshot, turnUsageDelta, turnUsageSnapshot } from './turn-usage'
+export type {
+  ChatMessage,
+  ChatMessagePart,
+  GatewayEventPayload,
+  TimelinePartMetadata,
+  TurnUsageDelta,
+  TurnUsageSnapshot
+} from './types'

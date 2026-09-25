@@ -317,7 +317,10 @@ const $sidebarAllProfilesGrouping = persistentAtom<SidebarGrouping>(
 // they used to inline the same literals in three places.
 const SIDEBAR_DEFAULT_GROUPING: SidebarGrouping = 'date'
 const SIDEBAR_DEFAULT_ORDERING: SidebarOrdering = 'updated'
-const SIDEBAR_DEFAULT_ROW_META: SidebarRowMeta[] = ['preview', 'updated']
+// Cost joins the shipped row-meta: spend awareness is the point of the pill.
+// The atom persists the user's own set, so anyone who ever toggled it keeps
+// exactly what they chose — this only seeds stores that never touched it.
+const SIDEBAR_DEFAULT_ROW_META: SidebarRowMeta[] = ['cost', 'preview', 'updated']
 
 const $sidebarSortKey = persistentAtom<SidebarSortKey>(
   SIDEBAR_SORT_KEY_STORAGE_KEY,

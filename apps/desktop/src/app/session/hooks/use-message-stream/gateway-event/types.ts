@@ -4,6 +4,7 @@ import type { MutableRefObject } from 'react'
 
 import type { GatewayEventPayload } from '@/lib/chat-messages'
 import type { ErrorSurface } from '@/lib/error-surface'
+import type { UsageStats } from '@/types/hermes'
 
 import type { ClientSessionState } from '../../../../types'
 
@@ -21,7 +22,8 @@ export interface GatewayEventDeps {
     responsePreviewed?: boolean,
     failure?: { error: string; partial: boolean },
     occurredAt?: number,
-    persistedTurn?: PersistedTurn | null
+    persistedTurn?: PersistedTurn | null,
+    usage?: Partial<UsageStats>
   ) => void
   failAssistantMessage: (
     sessionId: string,

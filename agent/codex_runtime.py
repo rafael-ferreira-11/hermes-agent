@@ -202,11 +202,26 @@ def _record_codex_app_server_usage(agent, turn, messages=None) -> dict[str, Any]
     cost_result = estimate_usage_cost(
         agent.model, canonical_usage, provider=agent.provider, base_url=agent.base_url, api_key=getattr(agent, "api_key", ""),
     )
+    # A gateway in front of the Responses API may stamp the call's real price into the
+    # usage object (see turn_usage._reported_actual_cost); reported actuals win and the
+    # call's estimate is suppressed so the two never double-count.
+    from agent.turn_usage import _reported_actual_cost
+
+    actual_cost_usd = _reported_actual_cost(canonical_usage)
     cost_usd = float(cost_result.amount_usd) if cost_result.amount_usd is not None else None
-    if cost_usd is not None:
-        agent.session_estimated_cost_usd += cost_usd
-    agent.session_cost_status, agent.session_cost_source = cost_result.status, cost_result.source
-    cost_fields = {"estimated_cost_usd": cost_usd, "cost_status": cost_result.status, "cost_source": cost_result.source}
+    if actual_cost_usd is not None:
+        agent.session_actual_cost_usd += actual_cost_usd
+        agent.session_cost_status, agent.session_cost_source = "actual", "provider_generation_api"
+    else:
+        if cost_usd is not None:
+            agent.session_estimated_cost_usd += cost_usd
+        agent.session_cost_status, agent.session_cost_source = cost_result.status, cost_result.source
+    cost_fields = {
+        "estimated_cost_usd": None if actual_cost_usd is not None else cost_usd,
+        "actual_cost_usd": actual_cost_usd,
+        "cost_status": "actual" if actual_cost_usd is not None else cost_result.status,
+        "cost_source": "provider_generation_api" if actual_cost_usd is not None else cost_result.source,
+    }
     _queue_token_counts(
         agent, "Codex app-server token persistence failed (session=%s, tokens=%d): %s", total_tokens,
         counts=lambda: billing(**token_counts, **cost_fields,

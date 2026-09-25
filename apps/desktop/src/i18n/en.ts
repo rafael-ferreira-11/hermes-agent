@@ -4105,6 +4105,8 @@ export const en: Translations = {
       toggleSessionTimer: 'Session timer',
       toggleTerminal: 'Terminal',
       toggleTokensPerSecond: 'Tokens per second',
+      toggleSessionCost: 'Session cost',
+      sessionCostTitle: 'Session running cost — ~ means an estimate, not a provider-reported price',
       toggleVersion: 'Version & updates',
       toggleFreeTier: 'Free tier',
       toggleWorkspace: 'Workspace',
@@ -4416,6 +4418,8 @@ export const en: Translations = {
       thoughtBriefly: 'Thought briefly',
       thoughtFor: duration => `Thought for ${duration}`,
       turnDuration: duration => `This turn took ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `This turn used ${input} in / ${output} out tokens — ${cost}` : `This turn used ${input} in / ${output} out tokens`,
       today: time => `Today, ${time}`,
       yesterday: time => `Yesterday, ${time}`,
       copy: 'Copy',

@@ -8,6 +8,7 @@ import {
   useMessageRuntime,
   useThreadRuntime
 } from '@assistant-ui/react'
+import { compactNumber } from '@hermes/shared'
 import { useStore } from '@nanostores/react'
 import { type FC, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { useInRouterContext, useNavigate } from 'react-router'
@@ -37,6 +38,8 @@ import { PreviewAttachment } from '@/components/chat/preview-attachment'
 import { Codicon } from '@/components/ui/codicon'
 import { CopyButton } from '@/components/ui/copy-button'
 import { useI18n } from '@/i18n'
+import { type TurnUsageDelta } from '@/lib/chat-messages'
+import { formatTurnUsage, formatUsdCost } from '@/lib/cost-format'
 import {
   errorRecoveryPlan,
   type ErrorSurface,
@@ -244,6 +247,9 @@ const AssistantMessageBody: FC<AssistantMessageProps & { collapsedNotice?: null 
   // Whole-turn wall-clock seconds (set once at completion — referentially
   // stable across the 30 Hz delta stream, so this adds no per-token renders).
   const turnDurationS = useAuiState(s => s.message.metadata?.custom?.durationS as number | undefined)
+  // This turn's own tokens/cost (stamped at completion like durationS, from
+  // the cumulative usage message.complete reports; see use-message-stream).
+  const turnUsage = useAuiState(s => s.message.metadata?.custom?.turnUsage as TurnUsageDelta | undefined)
 
   const getMessageText = useCallback(
     () =>
@@ -327,6 +333,7 @@ const AssistantMessageBody: FC<AssistantMessageProps & { collapsedNotice?: null 
               getMessageText={getMessageText}
               messageId={messageId}
               onBranchInNewChat={onBranchInNewChat}
+              turnUsage={turnUsage}
             />
           )}
           {/* Last thing in the turn — under the action bar, the way Cursor ends a
@@ -936,11 +943,12 @@ const ErrorRecoveryActions: FC = () => {
   )
 }
 
-const AssistantActionBar: FC<MessageActionProps & { durationS?: number }> = ({
+const AssistantActionBar: FC<MessageActionProps & { durationS?: number; turnUsage?: TurnUsageDelta }> = ({
   durationS,
   messageId,
   getMessageText,
-  onBranchInNewChat
+  onBranchInNewChat,
+  turnUsage
 }) => {
   const { t } = useI18n()
   const copy = t.assistant.thread
@@ -965,6 +973,25 @@ const AssistantActionBar: FC<MessageActionProps & { durationS?: number }> = ({
           title={t.assistant.thread.turnDuration(formatElapsed(durationS))}
         >
           ⏱ {formatElapsed(durationS)}
+        </span>
+      )}
+      {turnUsage && (
+        <span
+          className={cn(
+            'select-none px-0.5 text-[0.6875rem] leading-5 tabular-nums text-muted-foreground',
+            // Mirrors the duration chip's lane: when the duration badge is
+            // absent (no turnStartedAt) this chip claims the mr-auto lane so
+            // both layouts read left-aligned, never centered.
+            durationS === undefined && 'mr-auto'
+          )}
+          data-slot="aui_turn-usage"
+          title={t.assistant.thread.turnUsage(
+            compactNumber(turnUsage.input ?? 0),
+            compactNumber(turnUsage.output ?? 0),
+            turnUsage.costUsd !== undefined ? formatUsdCost(turnUsage.costUsd) : ''
+          )}
+        >
+          {formatTurnUsage(turnUsage)}
         </span>
       )}
       <ActionBarPrimitive.Root
@@ -1086,7 +1113,11 @@ const ReadAloudButton: FC<{ getText: () => string; messageId: string }> = ({ get
   )
 }
 
-const AssistantFooter: FC<MessageActionProps & { durationS?: number }> = ({ durationS, ...props }) => {
+const AssistantFooter: FC<MessageActionProps & { durationS?: number; turnUsage?: TurnUsageDelta }> = ({
+  durationS,
+  turnUsage,
+  ...props
+}) => {
   return (
     <div className="flex min-h-6 flex-col items-end gap-1 pr-(--message-text-indent) pl-(--message-text-indent)">
       <BranchPickerPrimitive.Root
@@ -1103,7 +1134,7 @@ const AssistantFooter: FC<MessageActionProps & { durationS?: number }> = ({ dura
           <Codicon name="chevron-right" size="0.875rem" />
         </BranchPickerPrimitive.Next>
       </BranchPickerPrimitive.Root>
-      <AssistantActionBar durationS={durationS} {...props} />
+      <AssistantActionBar durationS={durationS} turnUsage={turnUsage} {...props} />
     </div>
   )
 }

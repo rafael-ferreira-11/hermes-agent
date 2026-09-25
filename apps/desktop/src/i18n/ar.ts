@@ -3034,6 +3034,8 @@ export const ar = defineLocale({
       thoughtBriefly: 'فكّر قليلاً',
       thoughtFor: duration => `فكّر لمدة ${duration}`,
       turnDuration: duration => `استغرقت هذه الجولة ${duration}`,
+      turnUsage: (input, output, cost) =>
+        cost ? `استخدمت هذه الجولة ${input} رمزًا دخولاً / ${output} رمزًا خروجًا — ${cost}` : `استخدمت هذه الجولة ${input} رمزًا دخولاً / ${output} رمزًا خروجًا`,
       today: time => `اليوم ${time}`,
       yesterday: time => `أمس ${time}`,
       copy: 'نسخ',

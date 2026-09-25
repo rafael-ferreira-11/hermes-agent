@@ -23,6 +23,26 @@ export interface TimelinePartMetadata {
 
 export type ChatMessagePart = Exclude<ThreadMessageLike['content'], string>[number] & TimelinePartMetadata
 
+/** Session-cumulative usage as it stood when a turn settled — stamped on the
+ *  assistant message so the NEXT turn can subtract it (usage arrives on
+ *  message.complete as a session-cumulative figure; per-turn cost is derived,
+ *  never reported). Kept to the fields the transcript renders. */
+export interface TurnUsageSnapshot {
+  input: number
+  output: number
+  costUsd?: number
+  costStatus?: 'actual' | 'estimated' | 'included' | 'unknown' | string
+}
+
+/** One turn's OWN spend: this settle's cumulative snapshot minus the previous
+ *  assistant message's. Fields whose inputs are missing are omitted rather
+ *  than fabricated — a backend that reports no cost leaves no costUsd here. */
+export type TurnUsageDelta = {
+  input?: number
+  output?: number
+  costUsd?: number
+}
+
 export type ChatMessage = {
   id: string
   role: SessionMessage['role']
@@ -54,6 +74,14 @@ export type ChatMessage = {
    *  stamped by the desktop when it watched the turn run. Absent for
    *  messages hydrated from history — the backend doesn't persist it. */
   durationS?: number
+  /** Session-cumulative usage at the moment this turn settled (input/output
+   *  tokens, cost when the backend reports one) — the baseline the NEXT
+   *  turn's chip subtracts. Same lifetime as durationS: live-settled only. */
+  usage?: TurnUsageSnapshot
+  /** THIS turn's own tokens/cost, derived at settle (usage minus the previous
+   *  assistant message's stamped cumulative snapshot). Same lifetime as
+   *  durationS: live-settled only. */
+  turnUsage?: TurnUsageDelta
   /** Composer attachment ref strings (`@file:...`, `@image:...`) sent with this user message. */
   attachmentRefs?: string[]
   /** Durable backend `messages.id`. Absent until the row is persisted. */

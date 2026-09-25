@@ -60,7 +60,8 @@ describe('the sidebar as it ships', () => {
 
     expect($sidebarGrouping.get()).toBe('date')
     expect($sidebarOrdering.get()).toBe('updated')
-    expect($sidebarRowMeta.get()).toEqual(['preview', 'updated'])
+    // The shipped row-meta now includes the cost pill.
+    expect($sidebarRowMeta.get()).toEqual(['cost', 'preview', 'updated'])
     expect($sidebarViewCustomized.get()).toBe(false)
   })
 

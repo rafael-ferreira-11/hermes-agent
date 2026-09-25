@@ -793,6 +793,10 @@ export interface UsageStats {
   context_source?: string
   context_used?: number
   cost_usd?: number
+  /** How cost_usd was computed: provider-reported ("actual"), our own
+   *  estimate ("estimated"), free-tier included minutes ("included"), or
+   *  unknown. Absent on older backends that report no cost at all. */
+  cost_status?: 'actual' | 'estimated' | 'included' | 'unknown' | (string & {})
   input: number
   output: number
   total: number

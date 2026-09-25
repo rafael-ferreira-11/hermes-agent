@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { StableText } from '@/components/chat/stable-text'
 import { useViewedInterval } from '@/hooks/use-viewed-interval'
+import { formatUsdCost } from '@/lib/cost-format'
 import type { UsageStats } from '@/types/hermes'
 
 export function formatDuration(elapsedMs: number): string {
@@ -73,6 +74,21 @@ export function tokensPerSecondLabel(usage: UsageStats): string {
   const tps = usage.avg_tps
 
   return typeof tps === 'number' && Number.isFinite(tps) && tps > 0 ? `${Math.round(tps)} t/s` : ''
+}
+
+/** Session running cost for the bar, `$1.23` with `~` prefix while the
+ *  backend's own figure is an estimate; '' when the backend reports no cost
+ *  (older backends, subscription auth) so the item can self-hide. */
+export function costLabel(usage: UsageStats): string {
+  const cost = formatUsdCost(usage.cost_usd)
+
+  if (!cost) {
+    return ''
+  }
+
+  // "included" (free tier) and "actual" are exact; anything the backend has
+  // not priced precisely — currently "estimated" — keeps the honesty marker.
+  return usage.cost_status === 'estimated' ? `~${cost}` : cost
 }
 
 export function LiveDuration({ since }: { since: number | null | undefined }) {
