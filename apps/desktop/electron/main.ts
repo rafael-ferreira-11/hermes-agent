@@ -662,6 +662,7 @@ let windowsGpuStackCookieRelaunchAttempted = false
 
 if (IS_WINDOWS) {
   const windowsGpuUserData = app.getPath('userData')
+
   const gpuStackCookieDecision = decideWindowsGpuStackCookieLaunch({
     argv: process.argv,
     marker: readGpuStackCookieMarker(windowsGpuUserData),
@@ -6034,6 +6035,7 @@ async function watchPreviewFile(owner, rawUrl) {
     owner,
     close: () => {
       offOwnerDestroyed()
+
       if (timer) {
         clearTimeout(timer)
       }
@@ -6115,6 +6117,7 @@ function watchDirectory(owner, rawDir) {
     owner,
     close: () => {
       offOwnerDestroyed()
+
       if (timer) {
         clearTimeout(timer)
       }
@@ -12019,6 +12022,7 @@ async function runPoolBackendStart(
     WebSocketImpl: globalThis.WebSocket,
     ...spawnedBackendProbeOptions(childAlive)
   })
+
   assertPoolEntryStillOwned(poolKey, entry, backendPool, localBackendLifecycle.signal)
 
   if (!wsProbe.ok) {
@@ -12605,6 +12609,7 @@ async function runHermesStart({ supervisorRecovery = false }: { supervisorRecove
   migrateActiveProfileIfMissing()
 
   const connectionAttempt = backendConnectionState.startAttempt()
+
   // ONE launch-profile decision for this attempt (#108417): routing pin,
   // --profile argv, and the child env all derive from the same read, so a
   // hermes:profile:remember landing mid-startup becomes the NEXT boot's
@@ -12614,6 +12619,7 @@ async function runHermesStart({ supervisorRecovery = false }: { supervisorRecove
   const { argvProfile: activeProfile, routingProfile: primaryProfile } = resolveLaunchProfile(
     readActiveDesktopProfile
   )
+
   // Pin the routing table to the profile this primary actually boots as; a
   // later hermes:profile:remember must not retarget requests mid-life.
   primaryProfilePin.pin(primaryProfile)
@@ -12674,6 +12680,7 @@ async function runHermesStart({ supervisorRecovery = false }: { supervisorRecove
     const token = crypto.randomBytes(32).toString('base64url')
     // --port 0: the OS assigns an ephemeral port; the child announces it on stdout.
     const backendArgs = ['serve', '--host', '127.0.0.1', '--port', '0']
+
     // Pin the desktop's chosen profile via the global --profile flag. This is
     // deterministic (it wins over the sticky ~/.hermes/active_profile file) and
     // resolves HERMES_HOME the same way `hermes -p <name>` does on the CLI. An

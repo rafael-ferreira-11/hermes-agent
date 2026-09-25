@@ -3,20 +3,20 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { DesktopUpdateStatus, DesktopVersionInfo } from '@/global'
 import { en } from '@/i18n/en'
-import { $connection } from '@/store/session'
-import { $desktopVersion, $updateStatus } from '@/store/updates'
 
 import { AboutSettings } from './about-settings'
 
 vi.mock('@/store/session', async (importOriginal): Promise<Record<string, unknown>> => {
   const actual = await importOriginal<typeof import('@/store/session')>()
   const { atom } = await import('nanostores')
+
   return { ...actual, $connection: atom(null) }
 })
 
 vi.mock('@/store/updates', async (importOriginal): Promise<Record<string, unknown>> => {
   const actual = await importOriginal<typeof import('@/store/updates')>()
   const { atom } = await import('nanostores')
+
   return {
     ...actual,
     $desktopVersion: atom<DesktopVersionInfo | null>(null),

@@ -35,8 +35,8 @@ import { isDiskFullErrorMessage, notifyError } from '@/store/notifications'
 import { broadcastSessionsChanged } from '@/store/session-sync'
 import { upsertSubagent } from '@/store/subagents'
 import { $todosBySession, setSessionTodos } from '@/store/todos'
-import type { UsageStats } from '@/types/hermes'
 import { broadcastTranscriptChanged } from '@/store/transcript-sync'
+import type { UsageStats } from '@/types/hermes'
 
 import type { ClientSessionState } from '../../../types'
 

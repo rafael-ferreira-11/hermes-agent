@@ -390,6 +390,7 @@ const SILENT_TURN_RETRY: ErrorSurface = { code: 'stream_drop', layer: 'streaming
 function withSilentTurnRetry(messages: ChatMessage[], streamId: string | null): ChatMessage[] {
   const occurredAt = Date.now() / 1000
   const error = 'The connection dropped before the reply finished.'
+
   const targetId =
     (streamId && messages.some(message => message.id === streamId) ? streamId : null) ??
     [...messages].reverse().find(message => message.role === 'assistant' && message.pending)?.id ??
@@ -823,6 +824,7 @@ export function clearAllSessionStates() {
   }
 
   sessionWatchdogTimers.clear()
+
   for (const timer of sessionEventSilenceTimers.values()) {
     clearTimeout(timer)
   }
